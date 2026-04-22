@@ -1,4 +1,4 @@
-# Shared Schedule
+# myschedulechecker
 
 Next.js App Router, Tailwind CSS, Firebase Anonymous Auth, and Firestore로 만든 공유 일정 관리 웹 애플리케이션입니다.
 
