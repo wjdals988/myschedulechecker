@@ -1,0 +1,56 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function memberPath(roomId) {
+      return /databases/$(database)/documents/rooms/$(roomId)/members/$(request.auth.uid);
+    }
+
+    function isMember(roomId) {
+      return signedIn() && exists(memberPath(roomId));
+    }
+
+    function roomInviteMatches(roomId, inviteCode) {
+      return getAfter(/databases/$(database)/documents/rooms/$(roomId)).data.inviteCode == inviteCode;
+    }
+
+    match /roomCodes/{inviteCode} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.roomId is string;
+      allow update, delete: if false;
+    }
+
+    match /rooms/{roomId} {
+      allow create: if signedIn()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.inviteCode is string;
+      allow read, update: if isMember(roomId);
+      allow delete: if false;
+
+      match /members/{uid} {
+        allow read: if isMember(roomId);
+        allow create: if signedIn()
+          && uid == request.auth.uid
+          && request.resource.data.label is string
+          && request.resource.data.inviteCode is string
+          && roomInviteMatches(roomId, request.resource.data.inviteCode);
+        allow update: if signedIn() && uid == request.auth.uid && isMember(roomId);
+        allow delete: if signedIn() && uid == request.auth.uid;
+      }
+
+      match /events/{eventId} {
+        allow read, create, update, delete: if isMember(roomId);
+
+        match /todos/{todoId} {
+          allow read, create, update, delete: if isMember(roomId);
+        }
+      }
+    }
+  }
+}

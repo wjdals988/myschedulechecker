@@ -1,0 +1,37 @@
+export type VisitorProfile = {
+  label: string;
+  kind: "emoji" | "number" | "mixed";
+};
+
+export type Room = {
+  id: string;
+  name: string;
+  inviteCode: string;
+  createdBy: string;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+};
+
+export type EventItem = {
+  id: string;
+  title: string;
+  date: string;
+  startTime?: string;
+  endTime?: string;
+  memo?: string;
+  authorUid: string;
+  authorLabel: string;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+};
+
+export type TodoItem = {
+  id: string;
+  text: string;
+  done: boolean;
+  order: number;
+  authorUid: string;
+  authorLabel: string;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+};
