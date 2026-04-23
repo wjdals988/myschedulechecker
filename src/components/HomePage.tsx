@@ -147,7 +147,7 @@ export function HomePage() {
         <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <p className="app-kicker text-xs font-bold">Shared Schedule</p>
-            <h1 className="max-w-3xl text-3xl font-bold tracking-normal text-[var(--foreground)] sm:text-[2.6rem]">
+            <h1 className="max-w-3xl text-[2rem] font-bold tracking-normal text-[var(--foreground)] sm:text-[2.35rem]">
               다시 찾지 않아도 바로 들어가는 공유 일정 홈
             </h1>
             <p className="max-w-2xl text-sm leading-7 text-[var(--muted)] sm:text-base">
@@ -179,7 +179,7 @@ export function HomePage() {
             <div className="grid gap-4 lg:grid-cols-2">
               <form onSubmit={createRoom} className="app-panel p-5 sm:p-6">
                 <p className="app-kicker text-xs font-bold">Create Room</p>
-                <h2 className="mt-2 text-xl font-bold text-[var(--foreground)]">새 공유방 만들기</h2>
+                <h2 className="mt-2 text-lg font-bold text-[var(--foreground)]">새 공유방 만들기</h2>
                 <p className="mt-2 text-sm leading-6 text-[var(--muted)]">가족, 팀, 커플 등 함께 쓰는 방을 바로 만들 수 있습니다.</p>
                 <label className="mt-5 block text-sm font-semibold text-[var(--foreground)]">
                   방 이름
@@ -200,7 +200,7 @@ export function HomePage() {
 
               <form onSubmit={joinRoom} className="app-panel p-5 sm:p-6">
                 <p className="app-kicker text-xs font-bold">Join With Code</p>
-                <h2 className="mt-2 text-xl font-bold text-[var(--foreground)]">초대 코드로 참가</h2>
+                <h2 className="mt-2 text-lg font-bold text-[var(--foreground)]">초대 코드로 참가</h2>
                 <p className="mt-2 text-sm leading-6 text-[var(--muted)]">공유받은 코드를 붙여 넣으면 바로 방에 들어갑니다.</p>
                 <label className="mt-5 block text-sm font-semibold text-[var(--foreground)]">
                   초대 코드
@@ -232,7 +232,7 @@ export function HomePage() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="app-kicker text-xs font-bold">Recent Rooms</p>
-                  <h2 className="mt-2 text-xl font-bold text-[var(--foreground)]">최근 들어간 방</h2>
+                  <h2 className="mt-2 text-lg font-bold text-[var(--foreground)]">최근 들어간 방</h2>
                 </div>
                 <ClockIcon className="h-5 w-5 text-[var(--accent)]" />
               </div>

@@ -115,7 +115,7 @@ export function RoomShell({
       <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--surface)] px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-5xl flex-wrap items-start justify-between gap-3 sm:items-center">
           <div className="min-w-0">
-            <p className="truncate text-lg font-bold text-[var(--foreground)]">{room.name}</p>
+            <p className="truncate text-[1.1rem] font-bold text-[var(--foreground)]">{room.name}</p>
             <p className="text-xs text-[var(--muted)]">
               초대 코드 <span className="font-semibold tracking-[0.16em] text-[var(--accent)]">{room.inviteCode}</span>
               <span className="ml-2 text-[var(--muted-soft)]">v{APP_VERSION}</span>

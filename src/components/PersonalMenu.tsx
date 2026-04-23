@@ -102,7 +102,7 @@ export function PersonalMenu({
           <section className="fixed inset-x-3 bottom-[5.5rem] top-[5rem] z-50 overflow-y-auto rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-soft)] sm:absolute sm:right-0 sm:top-12 sm:bottom-auto sm:w-[22rem] sm:max-h-[min(40rem,calc(100vh-5rem))]">
             <div className="border-b border-[var(--border)] pb-4">
               <p className="app-kicker text-xs font-bold">Profile</p>
-              <h2 className="mt-2 truncate text-xl font-bold text-[var(--foreground)]">{displayName}</h2>
+              <h2 className="mt-2 truncate text-lg font-bold text-[var(--foreground)]">{displayName}</h2>
               <p className="mt-2 text-xs font-semibold text-[var(--muted)]">
                 {profile.label} · 초대 코드 <span className="tracking-[0.14em] text-[var(--accent)]">{room.inviteCode}</span>
               </p>

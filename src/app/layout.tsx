@@ -1,6 +1,14 @@
+import localFont from "next/font/local";
 import type { Metadata } from "next";
 import "./globals.css";
 import { themeInitScript } from "@/lib/theme";
+
+const maruBuri = localFont({
+  src: "./fonts/MaruBuri-Regular.ttf",
+  variable: "--font-maruburi",
+  display: "swap",
+  fallback: ["system-ui", "sans-serif"],
+});
 
 const appTitle = "정민나니 스케줄";
 const browserTitle = "공유 일정 관리";
@@ -35,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="ko" suppressHydrationWarning className={maruBuri.variable}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript() }} />
       </head>
