@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useTodoProgressMap } from "@/hooks/useTodoProgressMap";
 import { dayLabel, parseDateKey, todayKey, weekdayLabel } from "@/lib/dates";
+import { getEventColorOption, normalizeEventTag } from "@/lib/eventAppearance";
 import type { EventItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -40,10 +41,7 @@ export function AgendaListPanel({
     showFutureToggle && futureOnly && events.length > 0
       ? "오늘 이후 일정이 없습니다. 전체를 눌러 지난 일정을 확인하세요."
       : emptyMessage;
-  const todoProgress = useTodoProgressMap(
-    roomId,
-    showTodoProgress ? filteredEvents.map((event) => event.id) : [],
-  );
+  const todoProgress = useTodoProgressMap(roomId, showTodoProgress ? filteredEvents.map((event) => event.id) : []);
   const groupedEvents = filteredEvents.reduce<Record<string, EventItem[]>>((acc, event) => {
     acc[event.date] = [...(acc[event.date] ?? []), event];
     return acc;
@@ -58,9 +56,7 @@ export function AgendaListPanel({
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-bold text-[#14211f]">{title}</h2>
-          <p className="mt-1 text-xs font-semibold text-[#687a75]">
-            {loading ? "동기화 중" : `${filteredEvents.length}개`}
-          </p>
+          <p className="mt-1 text-xs font-semibold text-[#687a75]">{loading ? "불러오는 중" : `${filteredEvents.length}개`}</p>
         </div>
 
         {showFutureToggle ? (
@@ -92,13 +88,9 @@ export function AgendaListPanel({
       </div>
 
       {loading ? (
-        <p className="rounded-md border border-[#d8e3df] bg-white p-4 text-sm text-[#687a75]">
-          일정을 불러오는 중입니다.
-        </p>
+        <p className="rounded-md border border-[#d8e3df] bg-white p-4 text-sm text-[#687a75]">일정을 불러오는 중입니다.</p>
       ) : filteredEvents.length === 0 ? (
-        <p className="rounded-md border border-dashed border-[#c9d7d2] bg-white p-4 text-sm text-[#687a75]">
-          {effectiveEmptyMessage}
-        </p>
+        <p className="rounded-md border border-dashed border-[#c9d7d2] bg-white p-4 text-sm text-[#687a75]">{effectiveEmptyMessage}</p>
       ) : grouped ? (
         <div className="divide-y divide-[#d8e3df]">
           {groups.map((group) => {
@@ -169,20 +161,31 @@ function AgendaEventLink({
   progress?: { total: number; done: number };
 }) {
   const percent = progress && progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0;
+  const tone = getEventColorOption(event.color);
+  const tag = normalizeEventTag(event.tag);
 
   return (
     <Link
       href={`/rooms/${roomId}/schedule/${event.id}?date=${event.date}`}
-      className="block w-full rounded-md border border-[#d8e3df] bg-white p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#159a86] hover:shadow-md"
+      className={cn(
+        "block w-full rounded-md border border-[#d8e3df] border-l-4 bg-white p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#159a86] hover:shadow-md",
+        tone.accentClass,
+      )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="truncate font-semibold text-[#14211f]">{event.title}</div>
+          <div className="flex flex-wrap items-center gap-2">
+            {tag ? <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-bold", tone.badgeClass)}>{tag}</span> : null}
+            <div className="truncate font-semibold text-[#14211f]">{event.title}</div>
+          </div>
           <div className="mt-1 text-xs font-semibold text-[#687a75]">
             {event.startTime ?? "시간 없음"} {event.endTime ? `- ${event.endTime}` : ""}
           </div>
         </div>
-        {event.memo ? <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#df7a2f]" title="메모 있음" /> : null}
+        <div className="mt-1 flex items-center gap-2">
+          <span className={cn("h-2 w-2 shrink-0 rounded-full", tone.dotClass)} />
+          {event.memo ? <span className="h-2 w-2 shrink-0 rounded-full bg-[#df7a2f]" title="메모 있음" /> : null}
+        </div>
       </div>
       {event.memo ? <p className="mt-2 line-clamp-2 text-sm leading-5 text-[#52645f]">{event.memo}</p> : null}
       {progress && progress.total > 0 ? (

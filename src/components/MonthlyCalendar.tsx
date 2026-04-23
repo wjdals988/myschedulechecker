@@ -5,17 +5,11 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AgendaListPanel } from "@/components/AgendaListPanel";
 import { EventForm } from "@/components/EventForm";
-import { PlusIcon } from "@/components/icons";
+import { PlusIcon, TrashIcon } from "@/components/icons";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
-import {
-  dateKey,
-  dayLabel,
-  getMonthGrid,
-  isCurrentMonth,
-  isToday,
-  monthTitle,
-  parseDateKey,
-} from "@/lib/dates";
+import { dateKey, dayLabel, getMonthGrid, isCurrentMonth, isToday, monthTitle, parseDateKey } from "@/lib/dates";
+import { getEventColorOption, normalizeEventTag } from "@/lib/eventAppearance";
+import { deleteEventWithTodos } from "@/lib/eventMutations";
 import { getKoreanHoliday, getKoreanHolidayMapForDates } from "@/lib/koreanHolidays";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +17,8 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
   const router = useRouter();
   const [month, setMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
+  const [eventActionMessage, setEventActionMessage] = useState<string | null>(null);
   const days = useMemo(() => getMonthGrid(month), [month]);
   const bounds = useMemo(
     () => ({
@@ -39,6 +35,36 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
     [rangeEvents, month],
   );
   const holidayMap = useMemo(() => getKoreanHolidayMapForDates(days.map((day) => dateKey(day))), [days]);
+
+  function openDateModal(nextDate: string) {
+    setSelectedDate(nextDate);
+    setEventActionMessage(null);
+    setDeletingEventId(null);
+  }
+
+  function closeDateModal() {
+    setSelectedDate(null);
+    setEventActionMessage(null);
+    setDeletingEventId(null);
+  }
+
+  async function handleDeleteEvent(eventId: string, title: string) {
+    if (!window.confirm(`"${title}" 일정을 삭제할까요? 연결된 To-do도 함께 삭제됩니다.`)) {
+      return;
+    }
+
+    setDeletingEventId(eventId);
+    setEventActionMessage(null);
+
+    try {
+      await deleteEventWithTodos(roomId, eventId);
+      setEventActionMessage(`"${title}" 일정을 삭제했습니다.`);
+    } catch (caught) {
+      setEventActionMessage(caught instanceof Error ? caught.message : "일정 삭제에 실패했습니다.");
+    } finally {
+      setDeletingEventId(null);
+    }
+  }
 
   return (
     <main className="px-4 py-5 lg:py-6">
@@ -93,7 +119,7 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
               return (
                 <button
                   key={key}
-                  onClick={() => setSelectedDate(key)}
+                  onClick={() => openDateModal(key)}
                   aria-label={`${format(day, "yyyy.MM.dd")} 일정 ${events.length}개`}
                   className={cn(
                     "h-[50px] min-h-0 overflow-hidden rounded-md border bg-white px-1 py-1 text-left shadow-sm transition hover:border-[#159a86] sm:aspect-auto sm:h-auto sm:min-h-[6.25rem] sm:rounded sm:px-2 sm:pb-2 sm:pt-1.5 lg:min-h-[8.5rem] lg:px-3 lg:pb-3 lg:pt-1.5 xl:min-h-[9.25rem]",
@@ -115,6 +141,7 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
                       </span>
                       {hasMemo ? <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#df7a2f]" title="메모 있음" /> : null}
                     </div>
+
                     {holiday ? (
                       <div
                         className={cn(
@@ -126,23 +153,36 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
                         {holiday.name}
                       </div>
                     ) : null}
+
                     <div className="mt-auto flex min-h-2 items-end gap-0.5 sm:hidden">
                       {events.length > 0 ? (
                         <>
-                          {events.slice(0, 3).map((event) => (
-                            <span key={event.id} className="h-1.5 w-1.5 rounded-full bg-[#159a86]" />
-                          ))}
+                          {events.slice(0, 3).map((event) => {
+                            const tone = getEventColorOption(event.color);
+                            return <span key={event.id} className={cn("h-1.5 w-1.5 rounded-full", tone.dotClass)} />;
+                          })}
                           {events.length > 3 ? <span className="text-[9px] font-bold leading-none text-[#146c61]">+</span> : null}
                         </>
                       ) : null}
                     </div>
+
                     <div className="mt-2 hidden min-h-0 flex-1 space-y-1 overflow-hidden sm:block lg:mt-3 lg:max-h-[5.75rem]">
-                      {events.slice(0, 2).map((event) => (
-                        <div key={event.id} className="rounded bg-[#eefaf7] px-2 py-1 text-xs font-semibold text-[#146c61]">
-                          <div className="truncate">{event.title}</div>
-                          {event.startTime ? <div className="mt-0.5 text-[10px] text-[#4f7f76]">{event.startTime}</div> : null}
-                        </div>
-                      ))}
+                      {events.slice(0, 2).map((event) => {
+                        const tone = getEventColorOption(event.color);
+
+                        return (
+                          <div key={event.id} className={cn("rounded border px-2 py-1 text-xs font-semibold", tone.badgeClass)}>
+                            <div className="flex items-center gap-1">
+                              <span className={cn("h-1.5 w-1.5 rounded-full", tone.dotClass)} />
+                              {normalizeEventTag(event.tag) ? (
+                                <span className="truncate text-[10px] font-bold">{normalizeEventTag(event.tag)}</span>
+                              ) : null}
+                            </div>
+                            <div className="mt-0.5 truncate">{event.title}</div>
+                            {event.startTime ? <div className="mt-0.5 text-[10px] opacity-80">{event.startTime}</div> : null}
+                          </div>
+                        );
+                      })}
                       {events.length > 2 ? <div className="text-xs font-semibold text-[#687a75]">+{events.length - 2}</div> : null}
                     </div>
                   </div>
@@ -151,19 +191,19 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
             })}
           </div>
 
-          <AgendaListPanel
-            roomId={roomId}
-            title="이번 달 일정"
-            events={monthEvents}
-            loading={loading}
-            grouped
-            onDateSelect={setSelectedDate}
-            showFutureToggle
-            showTodoProgress
-            className="border-t border-[#d8e3df] pt-4 lg:hidden"
+            <AgendaListPanel
+              roomId={roomId}
+              title="이번 달 일정"
+              events={monthEvents}
+              loading={loading}
+              grouped
+              onDateSelect={openDateModal}
+              showFutureToggle
+              showTodoProgress
+              className="border-t border-[#d8e3df] pt-4 lg:hidden"
           />
 
-          {loading ? <p className="text-sm text-[#687a75]">월간 일정을 동기화하는 중입니다.</p> : null}
+          {loading ? <p className="text-sm text-[#687a75]">월간 일정 데이터를 불러오는 중입니다.</p> : null}
         </section>
 
         <aside className="hidden xl:block">
@@ -174,7 +214,7 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
               events={monthEvents}
               loading={loading}
               grouped
-              onDateSelect={setSelectedDate}
+              onDateSelect={openDateModal}
               showFutureToggle
               showTodoProgress
             />
@@ -192,36 +232,69 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
                 {selectedHoliday ? <p className="mt-1 text-sm font-semibold text-[#d95b43]">{selectedHoliday.name}</p> : null}
               </div>
               <button
-                onClick={() => setSelectedDate(null)}
+                onClick={closeDateModal}
                 className="h-9 rounded border border-[#c9d7d2] px-3 text-sm font-semibold"
               >
                 닫기
               </button>
             </div>
 
+            {eventActionMessage ? (
+              <p className="mt-4 rounded-md border border-[#d8e3df] bg-[#f8faf9] px-3 py-2 text-sm font-semibold text-[#52645f]">
+                {eventActionMessage}
+              </p>
+            ) : null}
+
             <div className="mt-5 space-y-2">
               {selectedEvents.length === 0 ? (
                 <p className="rounded border border-[#d8e3df] bg-[#f8faf9] p-3 text-sm text-[#687a75]">등록된 일정이 없습니다.</p>
               ) : (
-                selectedEvents.map((event) => (
-                  <button
-                    key={event.id}
-                    onClick={() => router.push(`/rooms/${roomId}/schedule/${event.id}?date=${selectedDate}`)}
-                    className="block w-full rounded border border-[#d8e3df] p-3 text-left transition hover:border-[#159a86]"
-                  >
-                    <div className="font-semibold">{event.title}</div>
-                    <div className="mt-1 text-sm text-[#687a75]">
-                      {event.startTime ?? "시간 없음"} {event.endTime ? `- ${event.endTime}` : ""}
+                selectedEvents.map((event) => {
+                  const tone = getEventColorOption(event.color);
+                  const normalizedTag = normalizeEventTag(event.tag);
+
+                  return (
+                    <div key={event.id} className={cn("rounded border p-3", tone.badgeClass)}>
+                      <div className="flex items-start gap-2">
+                        <button
+                          onClick={() => router.push(`/rooms/${roomId}/schedule/${event.id}?date=${selectedDate}`)}
+                          className="min-w-0 flex-1 text-left"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className={cn("h-2 w-2 rounded-full", tone.dotClass)} />
+                            {normalizedTag ? (
+                              <span className="truncate rounded-full border border-current/20 px-2 py-0.5 text-[10px] font-bold">
+                                {normalizedTag}
+                              </span>
+                            ) : null}
+                          </div>
+                          <div className="mt-2 font-semibold">{event.title}</div>
+                          <div className="mt-1 text-sm opacity-80">
+                            {event.startTime ?? "시간 없음"} {event.endTime ? `- ${event.endTime}` : ""}
+                          </div>
+                          {event.memo ? <p className="mt-2 line-clamp-2 text-sm opacity-80">{event.memo}</p> : null}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteEvent(event.id, event.title)}
+                          disabled={deletingEventId === event.id}
+                          className="inline-flex h-10 shrink-0 items-center justify-center gap-1 rounded-md border border-red-200 bg-white px-3 text-xs font-semibold text-red-700 disabled:opacity-50"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                          {deletingEventId === event.id ? "삭제 중" : "삭제"}
+                        </button>
+                      </div>
                     </div>
-                  </button>
-                ))
+                  );
+                })
               )}
             </div>
 
             <div className="mt-6 border-t border-[#d8e3df] pt-5">
               <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[#273f3a]">
                 <PlusIcon />
-                새 일정
+                일정 추가
               </div>
               <EventForm roomId={roomId} date={selectedDate} />
             </div>

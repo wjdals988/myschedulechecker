@@ -1,24 +1,20 @@
 "use client";
 
-import {
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  serverTimestamp,
-  updateDoc,
-  writeBatch,
-} from "firebase/firestore";
+import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { EventAppearanceFields } from "@/components/EventAppearanceFields";
 import { TodoEditor } from "@/components/TodoEditor";
 import { EditIcon, TrashIcon } from "@/components/icons";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { useEvent } from "@/hooks/useEvent";
+import { getEventColorOption, normalizeEventColor, normalizeEventTag, type EventColorKey } from "@/lib/eventAppearance";
+import { deleteEventWithTodos } from "@/lib/eventMutations";
 import { getDb } from "@/lib/firebase";
 import { profileDisplayName } from "@/lib/profile";
 import type { EventItem } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 type EventDraft = {
   title: string;
@@ -26,6 +22,8 @@ type EventDraft = {
   startTime: string;
   endTime: string;
   memo: string;
+  tag: string;
+  color: EventColorKey;
 };
 
 export function EventDetail({
@@ -82,17 +80,22 @@ function EventEditor({
       draft.date !== event.date ||
       normalizedOptional(draft.startTime) !== normalizedOptional(event.startTime) ||
       normalizedOptional(draft.endTime) !== normalizedOptional(event.endTime) ||
-      normalizedOptional(draft.memo) !== normalizedOptional(event.memo)
+      normalizedOptional(draft.memo) !== normalizedOptional(event.memo) ||
+      normalizeEventTag(draft.tag) !== normalizeEventTag(event.tag) ||
+      normalizeEventColor(draft.color) !== normalizeEventColor(event.color)
     );
   }, [draft, event]);
 
-  function updateDraft(field: keyof EventDraft, value: string) {
+  const colorOption = getEventColorOption(draft.color);
+
+  function updateDraft(field: keyof EventDraft, value: string | EventColorKey) {
     setDraft((current) => ({ ...current, [field]: value }));
   }
 
   function resetDraft() {
     setDraft(toDraft(event));
     setMessage(null);
+    setDeleteConfirmOpen(false);
   }
 
   async function saveEvent() {
@@ -116,6 +119,8 @@ function EventEditor({
         startTime: draft.startTime || null,
         endTime: draft.endTime || null,
         memo: draft.memo.trim() || null,
+        tag: normalizeEventTag(draft.tag) || null,
+        color: normalizeEventColor(draft.color),
         updatedAt: serverTimestamp(),
       });
 
@@ -135,17 +140,7 @@ function EventEditor({
     setMessage(null);
 
     try {
-      const firestore = getDb();
-      const todosRef = collection(firestore, "rooms", roomId, "events", eventId, "todos");
-      const todoSnapshot = await getDocs(todosRef);
-      const batch = writeBatch(firestore);
-
-      todoSnapshot.docs.forEach((todoDoc) => batch.delete(todoDoc.ref));
-      if (!todoSnapshot.empty) {
-        await batch.commit();
-      }
-      await deleteDoc(doc(firestore, "rooms", roomId, "events", eventId));
-
+      await deleteEventWithTodos(roomId, eventId);
       router.replace(`/rooms/${roomId}/schedule?date=${event.date}`);
     } catch (caught) {
       setMessage(caught instanceof Error ? caught.message : "일정 삭제에 실패했습니다.");
@@ -188,9 +183,21 @@ function EventEditor({
             <p className="text-sm font-semibold text-[#159a86]">Edit Schedule</p>
             <h1 className="mt-1 text-2xl font-bold text-[#14211f]">일정 수정</h1>
           </div>
-          <span className="rounded bg-[#eefaf7] px-2 py-1 text-xs font-semibold text-[#146c61]">
-            작성자 {event.authorLabel}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            {normalizeEventTag(draft.tag) ? (
+              <span className={cn("rounded-full border px-2.5 py-1 text-xs font-semibold", colorOption.badgeClass)}>
+                {normalizeEventTag(draft.tag)}
+              </span>
+            ) : null}
+            <span className="rounded bg-[#eefaf7] px-2 py-1 text-xs font-semibold text-[#146c61]">
+              작성자 {event.authorLabel}
+            </span>
+          </div>
+        </div>
+
+        <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[#52645f]">
+          <span className={cn("h-2.5 w-2.5 rounded-full", colorOption.dotClass)} />
+          <span>{colorOption.label} 일정</span>
         </div>
 
         <div className="grid gap-4">
@@ -233,6 +240,13 @@ function EventEditor({
             </label>
           </div>
 
+          <EventAppearanceFields
+            tag={draft.tag}
+            color={draft.color}
+            onTagChange={(value) => updateDraft("tag", value)}
+            onColorChange={(value) => updateDraft("color", value)}
+          />
+
           <label className="block text-sm font-semibold text-[#40534f]">
             메모
             <textarea
@@ -255,7 +269,7 @@ function EventEditor({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-bold text-red-700">일정 삭제</p>
-              <p className="mt-1 text-xs leading-5 text-red-600">삭제하면 이 일정의 To-do도 함께 삭제됩니다.</p>
+              <p className="mt-1 text-xs leading-5 text-red-600">삭제하면 이 일정과 연결된 To-do도 함께 삭제됩니다.</p>
             </div>
             {deleteConfirmOpen ? (
               <div className="grid grid-cols-2 gap-2 sm:flex">
@@ -313,6 +327,8 @@ function toDraft(event: EventItem): EventDraft {
     startTime: event.startTime ?? "",
     endTime: event.endTime ?? "",
     memo: event.memo ?? "",
+    tag: normalizeEventTag(event.tag),
+    color: normalizeEventColor(event.color),
   };
 }
 

@@ -176,10 +176,50 @@ html[data-theme="dark"] .bg-\[\#edf5f2\] {
   background-color: var(--accent-weak) !important;
 }
 
+html[data-theme="dark"] .bg-\[\#eef6ff\] {
+  background-color: #142131 !important;
+}
+
+html[data-theme="dark"] .bg-\[\#fff6e8\] {
+  background-color: #312414 !important;
+}
+
+html[data-theme="dark"] .bg-\[\#fff0f3\] {
+  background-color: #331b24 !important;
+}
+
+html[data-theme="dark"] .bg-\[\#f5f1ff\] {
+  background-color: #241c36 !important;
+}
+
+html[data-theme="dark"] .bg-\[\#f1f4f6\] {
+  background-color: #1a2328 !important;
+}
+
 html[data-theme="dark"] .border-\[\#d8e3df\],
 html[data-theme="dark"] .border-\[\#c9d7d2\],
 html[data-theme="dark"] .border-\[\#b8ded4\] {
   border-color: var(--border) !important;
+}
+
+html[data-theme="dark"] .border-\[\#bfd7f5\] {
+  border-color: #32557c !important;
+}
+
+html[data-theme="dark"] .border-\[\#f2d3a2\] {
+  border-color: #7a5826 !important;
+}
+
+html[data-theme="dark"] .border-\[\#f1c2cf\] {
+  border-color: #7f4a5d !important;
+}
+
+html[data-theme="dark"] .border-\[\#d9c8ff\] {
+  border-color: #5e4d86 !important;
+}
+
+html[data-theme="dark"] .border-\[\#cdd6db\] {
+  border-color: #465760 !important;
 }
 
 html[data-theme="dark"] .text-\[\#14211f\],
@@ -198,6 +238,26 @@ html[data-theme="dark"] .text-\[\#4f7f76\] {
 html[data-theme="dark"] .text-\[\#159a86\],
 html[data-theme="dark"] .text-\[\#146c61\] {
   color: var(--accent) !important;
+}
+
+html[data-theme="dark"] .text-\[\#285ea8\] {
+  color: #91bcff !important;
+}
+
+html[data-theme="dark"] .text-\[\#9a5a14\] {
+  color: #f3c27b !important;
+}
+
+html[data-theme="dark"] .text-\[\#a44c66\] {
+  color: #ff9db8 !important;
+}
+
+html[data-theme="dark"] .text-\[\#6642a8\] {
+  color: #c4a7ff !important;
+}
+
+html[data-theme="dark"] .text-\[\#41525c\] {
+  color: #b7c6cf !important;
 }
 
 html[data-theme="dark"] .shadow-sm,

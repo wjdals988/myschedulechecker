@@ -29,6 +29,8 @@ export type EventItem = {
   startTime?: string;
   endTime?: string;
   memo?: string;
+  tag?: string;
+  color?: string;
   authorUid: string;
   authorLabel: string;
   createdAt?: unknown;
