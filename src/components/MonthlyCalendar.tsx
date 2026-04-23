@@ -92,14 +92,14 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
                   onClick={() => setSelectedDate(key)}
                   aria-label={`${format(day, "yyyy.MM.dd")} 일정 ${events.length}개`}
                   className={cn(
-                    "h-[50px] min-h-0 overflow-hidden rounded-md border bg-white px-1 py-1 text-left shadow-sm transition hover:border-[#159a86] sm:aspect-auto sm:h-auto sm:min-h-[6.25rem] sm:rounded sm:p-2 lg:min-h-[8.5rem] lg:px-3 lg:py-2.5 xl:min-h-[9.25rem]",
+                    "h-[50px] min-h-0 overflow-hidden rounded-md border bg-white px-1 py-1 text-left shadow-sm transition hover:border-[#159a86] sm:aspect-auto sm:h-auto sm:min-h-[6.25rem] sm:rounded sm:px-2 sm:pb-2 sm:pt-1.5 lg:min-h-[8.5rem] lg:px-3 lg:pb-3 lg:pt-1.5 xl:min-h-[9.25rem]",
                     muted && "bg-[#eef3f1] text-[#9aa8a4]",
                     isToday(day) && "border-[#159a86]",
                     selected && "ring-2 ring-[#159a86]",
                   )}
                 >
-                  <div className="flex h-full flex-col justify-between sm:h-auto sm:block">
-                    <div className="flex items-start justify-between gap-1 lg:gap-2">
+                  <div className="flex h-full flex-col">
+                    <div className="flex shrink-0 items-start justify-between gap-1 lg:gap-2">
                       <span
                         className={cn(
                           "inline-grid h-6 w-6 place-items-center rounded text-xs font-semibold sm:h-7 sm:w-7 sm:text-sm lg:h-8 lg:w-8 lg:text-[0.95rem]",
@@ -120,15 +120,15 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
                         </>
                       ) : null}
                     </div>
-                  </div>
-                  <div className="mt-2 hidden max-h-14 space-y-1 overflow-hidden sm:block lg:mt-3 lg:max-h-[5.75rem]">
-                    {events.slice(0, 2).map((event) => (
-                      <div key={event.id} className="rounded bg-[#eefaf7] px-2 py-1 text-xs font-semibold text-[#146c61]">
-                        <div className="truncate">{event.title}</div>
-                        {event.startTime ? <div className="mt-0.5 text-[10px] text-[#4f7f76]">{event.startTime}</div> : null}
-                      </div>
-                    ))}
-                    {events.length > 2 ? <div className="text-xs font-semibold text-[#687a75]">+{events.length - 2}</div> : null}
+                    <div className="mt-2 hidden min-h-0 flex-1 space-y-1 overflow-hidden sm:block lg:mt-3 lg:max-h-[5.75rem]">
+                      {events.slice(0, 2).map((event) => (
+                        <div key={event.id} className="rounded bg-[#eefaf7] px-2 py-1 text-xs font-semibold text-[#146c61]">
+                          <div className="truncate">{event.title}</div>
+                          {event.startTime ? <div className="mt-0.5 text-[10px] text-[#4f7f76]">{event.startTime}</div> : null}
+                        </div>
+                      ))}
+                      {events.length > 2 ? <div className="text-xs font-semibold text-[#687a75]">+{events.length - 2}</div> : null}
+                    </div>
                   </div>
                 </button>
               );
