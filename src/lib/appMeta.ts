@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.4.1",
+    releasedAt: "2026-04-24",
+    title: "레이어 표시와 일정 스트립 폭 보정",
+    changes: [
+      "버전 정보 패널이 PC와 모바일에서 정상적으로 열리도록 헤더 밖 포털 레이어로 옮겼습니다.",
+      "모바일 프로필 시트가 본문 아래에 가려지지 않도록 수정하고, PC에서는 우상단 기준으로 열리게 바꿨습니다.",
+      "일정 탭 상단 가로 달력 칩의 폭과 높이를 키워 이전보다 읽기 쉬운 크기로 복원했습니다.",
+    ],
+  },
+  {
     version: "0.4.0",
     releasedAt: "2026-04-24",
     title: "달력 삭제와 일정 구분 기능 추가",
