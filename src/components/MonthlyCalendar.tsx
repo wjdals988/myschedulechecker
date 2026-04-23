@@ -38,9 +38,9 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
   );
 
   return (
-    <main className="px-4 py-5">
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="space-y-4">
+    <main className="px-4 py-5 lg:py-6">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px] 2xl:grid-cols-[minmax(0,1fr)_340px]">
+        <section className="space-y-4 xl:space-y-5">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-[#159a86]">Calendar</p>
@@ -70,7 +70,7 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
 
           {error ? <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
 
-          <div className="grid grid-cols-7 gap-0.5 text-center text-xs font-semibold text-[#687a75] sm:gap-1">
+          <div className="grid grid-cols-7 gap-0.5 text-center text-xs font-semibold text-[#687a75] sm:gap-1 lg:gap-1.5">
             {["일", "월", "화", "수", "목", "금", "토"].map((day) => (
               <div key={day} className="py-2">
                 {day}
@@ -78,7 +78,7 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
+          <div className="grid grid-cols-7 gap-0.5 sm:gap-1 lg:gap-1.5">
             {days.map((day) => {
               const key = dateKey(day);
               const events = byDate[key] ?? [];
@@ -92,17 +92,17 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
                   onClick={() => setSelectedDate(key)}
                   aria-label={`${format(day, "yyyy.MM.dd")} 일정 ${events.length}개`}
                   className={cn(
-                    "h-[50px] min-h-0 overflow-hidden rounded-md border bg-white px-1 py-1 text-left shadow-sm transition hover:border-[#159a86] sm:aspect-auto sm:h-auto sm:min-h-24 sm:rounded sm:p-2",
+                    "h-[50px] min-h-0 overflow-hidden rounded-md border bg-white px-1 py-1 text-left shadow-sm transition hover:border-[#159a86] sm:aspect-auto sm:h-auto sm:min-h-[6.25rem] sm:rounded sm:p-2 lg:min-h-[8.5rem] lg:px-3 lg:py-2.5 xl:min-h-[9.25rem]",
                     muted && "bg-[#eef3f1] text-[#9aa8a4]",
                     isToday(day) && "border-[#159a86]",
                     selected && "ring-2 ring-[#159a86]",
                   )}
                 >
                   <div className="flex h-full flex-col justify-between sm:h-auto sm:block">
-                    <div className="flex items-start justify-between gap-1">
+                    <div className="flex items-start justify-between gap-1 lg:gap-2">
                       <span
                         className={cn(
-                          "inline-grid h-6 w-6 place-items-center rounded text-xs font-semibold sm:h-7 sm:w-7 sm:text-sm",
+                          "inline-grid h-6 w-6 place-items-center rounded text-xs font-semibold sm:h-7 sm:w-7 sm:text-sm lg:h-8 lg:w-8 lg:text-[0.95rem]",
                           isToday(day) && "bg-[#159a86] text-white",
                         )}
                       >
@@ -121,7 +121,7 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
                       ) : null}
                     </div>
                   </div>
-                  <div className="mt-2 hidden max-h-14 space-y-1 overflow-hidden sm:block">
+                  <div className="mt-2 hidden max-h-14 space-y-1 overflow-hidden sm:block lg:mt-3 lg:max-h-[5.75rem]">
                     {events.slice(0, 2).map((event) => (
                       <div key={event.id} className="rounded bg-[#eefaf7] px-2 py-1 text-xs font-semibold text-[#146c61]">
                         <div className="truncate">{event.title}</div>
@@ -150,7 +150,7 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
           {loading ? <p className="text-sm text-[#687a75]">월간 일정을 동기화하는 중입니다.</p> : null}
         </section>
 
-        <aside className="hidden lg:block">
+        <aside className="hidden xl:block">
           <div className="sticky top-[92px] max-h-[calc(100vh-120px)] overflow-y-auto border-l border-[#d8e3df] pl-5">
             <AgendaListPanel
               roomId={roomId}
