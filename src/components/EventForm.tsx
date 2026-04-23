@@ -4,6 +4,7 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { FormEvent, useState } from "react";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { getDb } from "@/lib/firebase";
+import { profileDisplayName } from "@/lib/profile";
 import { PlusIcon } from "@/components/icons";
 
 export function EventForm({
@@ -42,7 +43,7 @@ export function EventForm({
         endTime: endTime || null,
         memo: memo.trim() || null,
         authorUid: session.uid,
-        authorLabel: session.profile.label,
+        authorLabel: profileDisplayName(session.profile),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });

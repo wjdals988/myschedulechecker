@@ -3,9 +3,10 @@
 import { addDays, format, startOfMonth } from "date-fns";
 import { ko } from "date-fns/locale";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useEventsByDate } from "@/hooks/useEventsByDate";
-import { parseDateKey } from "@/lib/dates";
+import { useEventsInRange } from "@/hooks/useEventsInRange";
+import { dateKey, parseDateKey } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 
 export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) {
@@ -14,7 +15,19 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
     const start = startOfMonth(selected);
     return Array.from({ length: 42 }, (_, index) => addDays(start, index));
   }, [selected]);
+  const dayRefs = useRef(new Map<string, HTMLAnchorElement>());
   const { events, loading, error } = useEventsByDate(roomId, date);
+  const rangeStart = dateKey(days[0] ?? selected);
+  const rangeEnd = dateKey(days[days.length - 1] ?? selected);
+  const { byDate } = useEventsInRange(roomId, rangeStart, rangeEnd);
+
+  useEffect(() => {
+    dayRefs.current.get(date)?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [date]);
 
   return (
     <main className="flex min-h-[calc(100vh-136px)] flex-col">
@@ -23,13 +36,21 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
           {days.map((day) => {
             const key = format(day, "yyyy-MM-dd");
             const active = key === date;
+            const hasMemo = (byDate[key] ?? []).some((event) => event.memo);
 
             return (
               <Link
                 key={key}
                 href={`/rooms/${roomId}/schedule?date=${key}`}
+                ref={(node) => {
+                  if (node) {
+                    dayRefs.current.set(key, node);
+                  } else {
+                    dayRefs.current.delete(key);
+                  }
+                }}
                 className={cn(
-                  "grid h-16 min-w-14 place-items-center rounded border px-2 text-center transition",
+                  "relative grid h-16 min-w-14 place-items-center rounded border px-2 text-center transition",
                   active
                     ? "border-[#14211f] bg-[#14211f] text-white"
                     : "border-[#d8e3df] bg-white text-[#52645f] hover:border-[#159a86]",
@@ -37,6 +58,15 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
               >
                 <span className="text-xs font-semibold">{format(day, "EEE", { locale: ko })}</span>
                 <span className="text-lg font-bold">{format(day, "d")}</span>
+                {hasMemo ? (
+                  <span
+                    className={cn(
+                      "absolute right-2 top-2 h-1.5 w-1.5 rounded-full",
+                      active ? "bg-[#f6c177]" : "bg-[#df7a2f]",
+                    )}
+                    title="메모 있음"
+                  />
+                ) : null}
               </Link>
             );
           })}

@@ -8,6 +8,7 @@ import { TrashIcon } from "@/components/icons";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { useEvent } from "@/hooks/useEvent";
 import { getDb } from "@/lib/firebase";
+import { profileDisplayName } from "@/lib/profile";
 
 export function EventDetail({
   roomId,
@@ -53,7 +54,7 @@ export function EventDetail({
     );
   }
 
-  const author = session.uid && session.profile ? { uid: session.uid, label: session.profile.label } : null;
+  const author = session.uid && session.profile ? { uid: session.uid, label: profileDisplayName(session.profile) } : null;
 
   return (
     <main className="space-y-5 px-4 py-5">

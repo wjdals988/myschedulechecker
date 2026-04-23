@@ -23,15 +23,28 @@ export function readVisitorProfile() {
   if (!raw) return null;
 
   try {
-    const parsed = JSON.parse(raw) as VisitorProfile;
+    const parsed = JSON.parse(raw) as Partial<VisitorProfile>;
     if (!parsed.label) return null;
-    return parsed;
+    return {
+      label: parsed.label,
+      nickname: parsed.nickname?.trim() || undefined,
+      kind: parsed.kind ?? "mixed",
+    };
   } catch {
     return null;
   }
 }
 
 export function saveVisitorProfile(profile: VisitorProfile) {
-  window.localStorage.setItem(visitorProfileKey, JSON.stringify(profile));
-  return profile;
+  const nextProfile = {
+    ...profile,
+    nickname: profile.nickname?.trim() || undefined,
+  };
+
+  window.localStorage.setItem(visitorProfileKey, JSON.stringify(nextProfile));
+  return nextProfile;
+}
+
+export function profileDisplayName(profile: VisitorProfile) {
+  return profile.nickname?.trim() || profile.label;
 }

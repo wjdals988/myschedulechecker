@@ -29,3 +29,11 @@ export function TrashIcon({ className = "h-5 w-5" }: { className?: string }) {
     </svg>
   );
 }
+
+export function ShareIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path d="M8.5 12.5 15.5 16.5M15.5 7.5 8.5 11.5M7 14.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5ZM17 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5ZM17 19.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}

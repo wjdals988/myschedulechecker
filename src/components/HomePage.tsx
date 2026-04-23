@@ -7,6 +7,7 @@ import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { getDb } from "@/lib/firebase";
 import { createInviteCode, normalizeInviteCode } from "@/lib/invite";
 import { ProfilePicker } from "@/components/ProfilePicker";
+import { profileDisplayName } from "@/lib/profile";
 
 export function HomePage() {
   const router = useRouter();
@@ -56,6 +57,7 @@ export function HomePage() {
       });
       batch.set(doc(firestore, "rooms", roomRef.id, "members", session.uid), {
         label: session.profile.label,
+        nickname: session.profile.nickname ?? null,
         inviteCode: code,
         joinedAt: now,
         lastSeenAt: now,
@@ -101,6 +103,7 @@ export function HomePage() {
         doc(firestore, "rooms", roomId, "members", session.uid),
         {
           label: session.profile.label,
+          nickname: session.profile.nickname ?? null,
           inviteCode: code,
           joinedAt: now,
           lastSeenAt: now,
@@ -131,7 +134,7 @@ export function HomePage() {
           {session.loading ? (
             <p className="text-sm text-[#687a75]">익명 세션을 준비하는 중입니다.</p>
           ) : (
-            <ProfilePicker currentLabel={session.profile?.label} onPick={session.setProfile} />
+            <ProfilePicker currentProfile={session.profile} onPick={session.setProfile} />
           )}
           {session.error ? <p className="mt-3 text-sm text-red-600">{session.error}</p> : null}
         </section>
@@ -151,7 +154,7 @@ export function HomePage() {
               disabled={busy || !session.uid}
               className="mt-4 inline-flex h-11 w-full items-center justify-center rounded bg-[#14211f] px-4 text-sm font-semibold text-white transition hover:bg-[#243a35] disabled:opacity-50"
             >
-              방 만들기
+              {session.profile ? `${profileDisplayName(session.profile)}로 방 만들기` : "방 만들기"}
             </button>
           </form>
 

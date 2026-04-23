@@ -1,5 +1,6 @@
 export type VisitorProfile = {
   label: string;
+  nickname?: string;
   kind: "emoji" | "number" | "mixed";
 };
 

@@ -72,26 +72,41 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
             const key = dateKey(day);
             const events = byDate[key] ?? [];
             const muted = !isCurrentMonth(day, month);
+            const hasMemo = events.some((event) => event.memo);
+            const selected = selectedDate === key;
 
             return (
               <button
                 key={key}
                 onClick={() => setSelectedDate(key)}
                 className={cn(
-                  "min-h-24 rounded border bg-white p-2 text-left shadow-sm transition hover:border-[#159a86]",
+                  "aspect-square min-h-0 rounded border bg-white p-1 text-left shadow-sm transition hover:border-[#159a86] sm:aspect-auto sm:min-h-24 sm:p-2",
                   muted && "bg-[#eef3f1] text-[#9aa8a4]",
                   isToday(day) && "border-[#159a86]",
+                  selected && "ring-2 ring-[#159a86]",
                 )}
               >
-                <span
-                  className={cn(
-                    "inline-grid h-7 w-7 place-items-center rounded text-sm font-semibold",
-                    isToday(day) && "bg-[#159a86] text-white",
-                  )}
-                >
-                  {dayLabel(day)}
-                </span>
-                <div className="mt-2 space-y-1">
+                <div className="flex h-full flex-col justify-between sm:block">
+                  <div className="flex items-start justify-between gap-1">
+                    <span
+                      className={cn(
+                        "inline-grid h-6 w-6 place-items-center rounded text-xs font-semibold sm:h-7 sm:w-7 sm:text-sm",
+                        isToday(day) && "bg-[#159a86] text-white",
+                      )}
+                    >
+                      {dayLabel(day)}
+                    </span>
+                    {hasMemo ? <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#df7a2f]" title="메모 있음" /> : null}
+                  </div>
+                  <div className="mt-1 flex items-center gap-1 sm:hidden">
+                    {events.length > 0 ? (
+                      <span className="rounded bg-[#eefaf7] px-1.5 py-0.5 text-[10px] font-semibold text-[#146c61]">
+                        {events.length}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+                <div className="mt-2 hidden space-y-1 sm:block">
                   {events.slice(0, 2).map((event) => (
                     <div key={event.id} className="truncate rounded bg-[#eefaf7] px-2 py-1 text-xs text-[#146c61]">
                       {event.title}
@@ -110,8 +125,8 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
       </section>
 
       {selectedDate ? (
-        <div className="fixed inset-0 z-40 bg-black/45 p-4">
-          <div className="mx-auto mt-10 max-h-[84vh] max-w-lg overflow-y-auto rounded-lg bg-white p-5 shadow-xl">
+        <div className="fixed inset-0 z-40 flex items-end bg-black/45 p-0 sm:block sm:p-4">
+          <div className="mx-auto max-h-[86vh] w-full max-w-lg overflow-y-auto rounded-t-lg bg-white p-4 shadow-xl sm:mt-10 sm:rounded-lg sm:p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-[#159a86]">{format(parseDateKey(selectedDate), "yyyy.MM.dd")}</p>
