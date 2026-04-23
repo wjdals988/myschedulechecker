@@ -4,9 +4,10 @@ import { addDays, addMonths, format, startOfMonth, subMonths } from "date-fns";
 import { ko } from "date-fns/locale";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AgendaListPanel } from "@/components/AgendaListPanel";
-import { CalendarIcon } from "@/components/icons";
+import { EventForm } from "@/components/EventForm";
+import { CalendarIcon, PlusIcon } from "@/components/icons";
 import { useEventsByDate } from "@/hooks/useEventsByDate";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
 import { dateKey, isCurrentMonth, parseDateKey, todayKey } from "@/lib/dates";
@@ -14,6 +15,7 @@ import { cn } from "@/lib/utils";
 
 export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) {
   const router = useRouter();
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
   const selected = parseDateKey(date);
   const selectedMonth = startOfMonth(selected);
   const previousMonthDate = dateKey(subMonths(selectedMonth, 1));
@@ -45,19 +47,19 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
           <div className="flex gap-1.5">
             <Link
               href={`/rooms/${roomId}/schedule?date=${previousMonthDate}`}
-              className="h-9 rounded border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold"
+              className="h-9 rounded-md border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
             >
               이전달
             </Link>
             <Link
               href={`/rooms/${roomId}/schedule?date=${todayKey()}`}
-              className="h-9 rounded border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold"
+              className="h-9 rounded-md border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
             >
               오늘
             </Link>
             <Link
               href={`/rooms/${roomId}/schedule?date=${nextMonthDate}`}
-              className="h-9 rounded border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold"
+              className="h-9 rounded-md border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
             >
               다음달
             </Link>
@@ -113,23 +115,55 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                 <p className="text-sm font-semibold text-[#159a86]">Schedule</p>
                 <h1 className="text-2xl font-bold">{format(selected, "M월 d일 EEEE", { locale: ko })}</h1>
               </div>
-              <Link
-                href={`/rooms/${roomId}/calendar`}
-                className="inline-flex h-10 items-center gap-2 rounded border border-[#c9d7d2] bg-white px-3 py-2 text-sm font-semibold"
-              >
-                <CalendarIcon className="h-4 w-4" />
-                달력
-              </Link>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setQuickAddOpen((open) => !open)}
+                  className="inline-flex h-10 items-center gap-2 rounded-md bg-[#14211f] px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#223632]"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  빠른 추가
+                </button>
+                <Link
+                  href={`/rooms/${roomId}/calendar`}
+                  className="inline-flex h-10 items-center gap-2 rounded-md border border-[#c9d7d2] bg-white px-3 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
+                >
+                  <CalendarIcon className="h-4 w-4" />
+                  달력
+                </Link>
+              </div>
             </div>
 
             {error ? <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
 
-            <div className="rounded-md border border-[#d8e3df] bg-white p-4">
-              <p className="text-xs font-semibold text-[#687a75]">선택일 일정</p>
-              <p className="mt-1 text-2xl font-bold text-[#14211f]">
-                {selectedDateLoading ? "-" : selectedDateEvents.length}
-              </p>
+            <div className="rounded-md border border-[#d8e3df] bg-white p-4 shadow-sm">
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold text-[#687a75]">선택일 일정</p>
+                  <p className="mt-1 text-2xl font-bold text-[#14211f]">
+                    {selectedDateLoading ? "-" : selectedDateEvents.length}
+                  </p>
+                </div>
+                <p className="text-right text-xs font-semibold text-[#687a75]">이 날짜에 바로 추가할 수 있습니다.</p>
+              </div>
             </div>
+
+            {quickAddOpen ? (
+              <section className="rounded-md border border-[#d8e3df] bg-white p-4 shadow-sm">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold text-[#159a86]">Quick Add</p>
+                    <h2 className="font-bold text-[#14211f]">선택한 날짜에 일정 추가</h2>
+                  </div>
+                  <button
+                    onClick={() => setQuickAddOpen(false)}
+                    className="h-8 rounded border border-[#c9d7d2] px-2.5 text-xs font-semibold"
+                  >
+                    접기
+                  </button>
+                </div>
+                <EventForm roomId={roomId} date={date} onCreated={() => setQuickAddOpen(false)} />
+              </section>
+            ) : null}
 
             <AgendaListPanel
               roomId={roomId}
@@ -139,6 +173,8 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
               grouped
               emptyMessage="이번 달에는 일정이 없습니다."
               onDateSelect={(nextDate) => router.push(`/rooms/${roomId}/schedule?date=${nextDate}`)}
+              showFutureToggle
+              showTodoProgress
               className="lg:hidden"
             />
           </div>
@@ -153,6 +189,8 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                 grouped
                 emptyMessage="이번 달에는 일정이 없습니다."
                 onDateSelect={(nextDate) => router.push(`/rooms/${roomId}/schedule?date=${nextDate}`)}
+                showFutureToggle
+                showTodoProgress
               />
             </div>
           </aside>

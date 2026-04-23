@@ -142,6 +142,8 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
             loading={loading}
             grouped
             onDateSelect={setSelectedDate}
+            showFutureToggle
+            showTodoProgress
             className="border-t border-[#d8e3df] pt-4 lg:hidden"
           />
 
@@ -157,6 +159,8 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
               loading={loading}
               grouped
               onDateSelect={setSelectedDate}
+              showFutureToggle
+              showTodoProgress
             />
           </div>
         </aside>

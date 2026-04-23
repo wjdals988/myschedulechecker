@@ -2,8 +2,9 @@
 
 import { format } from "date-fns";
 import Link from "next/link";
-import { useMemo } from "react";
-import { dayLabel, parseDateKey, weekdayLabel } from "@/lib/dates";
+import { useState } from "react";
+import { useTodoProgressMap } from "@/hooks/useTodoProgressMap";
+import { dayLabel, parseDateKey, todayKey, weekdayLabel } from "@/lib/dates";
 import type { EventItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +17,8 @@ type AgendaListPanelProps = {
   emptyMessage?: string;
   className?: string;
   onDateSelect?: (date: string) => void;
+  showFutureToggle?: boolean;
+  showTodoProgress?: boolean;
 };
 
 export function AgendaListPanel({
@@ -27,33 +30,70 @@ export function AgendaListPanel({
   emptyMessage = "등록된 일정이 없습니다.",
   className,
   onDateSelect,
+  showFutureToggle = false,
+  showTodoProgress = false,
 }: AgendaListPanelProps) {
-  const groups = useMemo(() => {
-    const groupedEvents = events.reduce<Record<string, EventItem[]>>((acc, event) => {
-      acc[event.date] = [...(acc[event.date] ?? []), event];
-      return acc;
-    }, {});
-
-    return Object.entries(groupedEvents).map(([date, groupEvents]) => ({
-      date,
-      events: groupEvents,
-    }));
-  }, [events]);
+  const [futureOnly, setFutureOnly] = useState(true);
+  const today = todayKey();
+  const filteredEvents = showFutureToggle && futureOnly ? events.filter((event) => event.date >= today) : events;
+  const effectiveEmptyMessage =
+    showFutureToggle && futureOnly && events.length > 0
+      ? "오늘 이후 일정이 없습니다. 전체를 눌러 지난 일정을 확인하세요."
+      : emptyMessage;
+  const todoProgress = useTodoProgressMap(
+    roomId,
+    showTodoProgress ? filteredEvents.map((event) => event.id) : [],
+  );
+  const groupedEvents = filteredEvents.reduce<Record<string, EventItem[]>>((acc, event) => {
+    acc[event.date] = [...(acc[event.date] ?? []), event];
+    return acc;
+  }, {});
+  const groups = Object.entries(groupedEvents).map(([date, groupEvents]) => ({
+    date,
+    events: groupEvents,
+  }));
 
   return (
     <section className={cn("space-y-3", className)}>
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-base font-bold text-[#14211f]">{title}</h2>
-        <span className="text-xs font-semibold text-[#687a75]">{loading ? "동기화 중" : `${events.length}개`}</span>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-base font-bold text-[#14211f]">{title}</h2>
+          <p className="mt-1 text-xs font-semibold text-[#687a75]">
+            {loading ? "동기화 중" : `${filteredEvents.length}개`}
+          </p>
+        </div>
+
+        {showFutureToggle ? (
+          <div className="flex rounded-md border border-[#c9d7d2] bg-white p-0.5">
+            <button
+              onClick={() => setFutureOnly(true)}
+              className={cn(
+                "h-8 rounded px-2.5 text-xs font-semibold transition",
+                futureOnly ? "bg-[#14211f] text-white" : "text-[#52645f]",
+              )}
+            >
+              오늘 이후
+            </button>
+            <button
+              onClick={() => setFutureOnly(false)}
+              className={cn(
+                "h-8 rounded px-2.5 text-xs font-semibold transition",
+                !futureOnly ? "bg-[#14211f] text-white" : "text-[#52645f]",
+              )}
+            >
+              전체
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {loading ? (
         <p className="rounded-md border border-[#d8e3df] bg-white p-4 text-sm text-[#687a75]">
           일정을 불러오는 중입니다.
         </p>
-      ) : events.length === 0 ? (
+      ) : filteredEvents.length === 0 ? (
         <p className="rounded-md border border-dashed border-[#c9d7d2] bg-white p-4 text-sm text-[#687a75]">
-          {emptyMessage}
+          {effectiveEmptyMessage}
         </p>
       ) : grouped ? (
         <div className="divide-y divide-[#d8e3df]">
@@ -78,7 +118,12 @@ export function AgendaListPanel({
 
                 <div className="space-y-2">
                   {group.events.map((event) => (
-                    <AgendaEventLink key={event.id} roomId={roomId} event={event} />
+                    <AgendaEventLink
+                      key={event.id}
+                      roomId={roomId}
+                      event={event}
+                      progress={showTodoProgress ? todoProgress[event.id] : undefined}
+                    />
                   ))}
                 </div>
               </div>
@@ -87,8 +132,13 @@ export function AgendaListPanel({
         </div>
       ) : (
         <div className="space-y-2">
-          {events.map((event) => (
-            <AgendaEventLink key={event.id} roomId={roomId} event={event} />
+          {filteredEvents.map((event) => (
+            <AgendaEventLink
+              key={event.id}
+              roomId={roomId}
+              event={event}
+              progress={showTodoProgress ? todoProgress[event.id] : undefined}
+            />
           ))}
         </div>
       )}
@@ -105,11 +155,21 @@ function DateBadge({ date }: { date: Date }) {
   );
 }
 
-function AgendaEventLink({ roomId, event }: { roomId: string; event: EventItem }) {
+function AgendaEventLink({
+  roomId,
+  event,
+  progress,
+}: {
+  roomId: string;
+  event: EventItem;
+  progress?: { total: number; done: number };
+}) {
+  const percent = progress && progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0;
+
   return (
     <Link
       href={`/rooms/${roomId}/schedule/${event.id}?date=${event.date}`}
-      className="block w-full rounded-md border border-[#d8e3df] bg-white p-3 text-left shadow-sm transition hover:border-[#159a86]"
+      className="block w-full rounded-md border border-[#d8e3df] bg-white p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#159a86] hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
@@ -121,6 +181,19 @@ function AgendaEventLink({ roomId, event }: { roomId: string; event: EventItem }
         {event.memo ? <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#df7a2f]" title="메모 있음" /> : null}
       </div>
       {event.memo ? <p className="mt-2 line-clamp-2 text-sm leading-5 text-[#52645f]">{event.memo}</p> : null}
+      {progress && progress.total > 0 ? (
+        <div className="mt-3">
+          <div className="mb-1 flex items-center justify-between text-[11px] font-semibold text-[#687a75]">
+            <span>To-do</span>
+            <span>
+              {progress.done}/{progress.total} 완료
+            </span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-[#e4ece9]">
+            <div className="h-full rounded-full bg-[#159a86]" style={{ width: `${percent}%` }} />
+          </div>
+        </div>
+      ) : null}
     </Link>
   );
 }
