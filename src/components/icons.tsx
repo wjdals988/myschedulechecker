@@ -37,3 +37,35 @@ export function ShareIcon({ className = "h-5 w-5" }: { className?: string }) {
     </svg>
   );
 }
+
+export function HomeIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path d="m4 11 8-7 8 7M6 10v10h12V10M10 20v-6h4v6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function UserIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 20a7.5 7.5 0 0 1 15 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function UsersIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path d="M16 11a3.5 3.5 0 1 0-2.6-5.84M8 11a3.5 3.5 0 1 1 2.6-5.84M3.5 20a5.5 5.5 0 0 1 9.5-3.8M11 20a5.5 5.5 0 0 1 9.5-3.8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function EditIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path d="m4 16.5-.5 4 4-.5L19 8.5 15.5 5 4 16.5ZM14.5 6l3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}

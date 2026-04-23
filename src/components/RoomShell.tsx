@@ -7,10 +7,10 @@ import { useEffect, useState } from "react";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { APP_VERSION } from "@/lib/appMeta";
 import { getDb } from "@/lib/firebase";
-import { profileDisplayName } from "@/lib/profile";
 import type { Room } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, ListIcon, ShareIcon } from "@/components/icons";
+import { PersonalMenu } from "@/components/PersonalMenu";
 import { ProfilePicker } from "@/components/ProfilePicker";
 import { todayKey } from "@/lib/dates";
 
@@ -76,7 +76,7 @@ export function RoomShell({
     );
   }
 
-  if (!session.profile) {
+  if (!session.uid || !session.profile) {
     return (
       <main className="min-h-screen bg-[#f8faf9] p-6">
         <div className="mx-auto max-w-md rounded-lg border border-[#d8e3df] bg-white p-5 shadow-sm">
@@ -118,15 +118,21 @@ export function RoomShell({
           <div className="flex shrink-0 items-center gap-2">
             <button
               onClick={() => copyShareLink(room.inviteCode)}
-              className="inline-flex h-10 items-center justify-center gap-1 rounded border border-[#c9d7d2] bg-white px-3 text-sm font-semibold text-[#273f3a]"
+              className="inline-flex h-10 items-center justify-center gap-1 rounded-md border border-[#c9d7d2] bg-white px-3 text-sm font-semibold text-[#273f3a] shadow-sm transition hover:border-[#159a86]"
               title="공유 링크 복사"
             >
               <ShareIcon className="h-4 w-4" />
               <span className="hidden sm:inline">{shareStatus === "copied" ? "복사됨" : shareStatus === "failed" ? "실패" : "공유"}</span>
             </button>
-            <div className="max-w-32 truncate rounded border border-[#d8e3df] bg-[#f8faf9] px-3 py-2 text-sm font-semibold sm:max-w-48">
-              {profileDisplayName(session.profile)}
-            </div>
+            <PersonalMenu
+              roomId={roomId}
+              room={room}
+              uid={session.uid}
+              profile={session.profile}
+              onProfileChange={session.setProfile}
+              onCopyShareLink={() => copyShareLink(room.inviteCode)}
+              shareStatus={shareStatus}
+            />
           </div>
         </div>
         {shareStatus !== "idle" ? (

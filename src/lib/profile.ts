@@ -45,6 +45,6 @@ export function saveVisitorProfile(profile: VisitorProfile) {
   return nextProfile;
 }
 
-export function profileDisplayName(profile: VisitorProfile) {
+export function profileDisplayName(profile: { label: string; nickname?: string | null }) {
   return profile.nickname?.trim() || profile.label;
 }

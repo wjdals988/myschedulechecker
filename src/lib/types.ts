@@ -13,6 +13,15 @@ export type Room = {
   updatedAt?: unknown;
 };
 
+export type RoomMember = {
+  id: string;
+  label: string;
+  nickname?: string | null;
+  inviteCode?: string;
+  joinedAt?: unknown;
+  lastSeenAt?: unknown;
+};
+
 export type EventItem = {
   id: string;
   title: string;
