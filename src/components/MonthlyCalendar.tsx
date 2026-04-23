@@ -7,7 +7,6 @@ import { useEventsInRange } from "@/hooks/useEventsInRange";
 import {
   dateKey,
   dayLabel,
-  getMonthBounds,
   getMonthGrid,
   isCurrentMonth,
   isToday,
@@ -22,8 +21,14 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
   const router = useRouter();
   const [month, setMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const bounds = useMemo(() => getMonthBounds(month), [month]);
   const days = useMemo(() => getMonthGrid(month), [month]);
+  const bounds = useMemo(
+    () => ({
+      start: dateKey(days[0] ?? month),
+      end: dateKey(days[days.length - 1] ?? month),
+    }),
+    [days, month],
+  );
   const { byDate, loading, error } = useEventsInRange(roomId, bounds.start, bounds.end);
   const selectedEvents = selectedDate ? byDate[selectedDate] ?? [] : [];
 
@@ -108,8 +113,9 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
                 </div>
                 <div className="mt-2 hidden space-y-1 sm:block">
                   {events.slice(0, 2).map((event) => (
-                    <div key={event.id} className="truncate rounded bg-[#eefaf7] px-2 py-1 text-xs text-[#146c61]">
-                      {event.title}
+                    <div key={event.id} className="rounded bg-[#eefaf7] px-2 py-1 text-xs font-semibold text-[#146c61]">
+                      <div className="truncate">{event.title}</div>
+                      {event.startTime ? <div className="mt-0.5 text-[10px] text-[#4f7f76]">{event.startTime}</div> : null}
                     </div>
                   ))}
                   {events.length > 2 ? (
