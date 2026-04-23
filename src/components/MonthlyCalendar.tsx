@@ -16,6 +16,7 @@ import {
   monthTitle,
   parseDateKey,
 } from "@/lib/dates";
+import { getKoreanHoliday, getKoreanHolidayMapForDates } from "@/lib/koreanHolidays";
 import { cn } from "@/lib/utils";
 
 export function MonthlyCalendar({ roomId }: { roomId: string }) {
@@ -32,10 +33,12 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
   );
   const { events: rangeEvents, byDate, loading, error } = useEventsInRange(roomId, bounds.start, bounds.end);
   const selectedEvents = selectedDate ? byDate[selectedDate] ?? [] : [];
+  const selectedHoliday = selectedDate ? getKoreanHoliday(selectedDate) : undefined;
   const monthEvents = useMemo(
     () => rangeEvents.filter((event) => isCurrentMonth(parseDateKey(event.date), month)),
     [rangeEvents, month],
   );
+  const holidayMap = useMemo(() => getKoreanHolidayMapForDates(days.map((day) => dateKey(day))), [days]);
 
   return (
     <main className="px-4 py-5 lg:py-6">
@@ -84,6 +87,7 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
               const events = byDate[key] ?? [];
               const muted = !isCurrentMonth(day, month);
               const hasMemo = events.some((event) => event.memo);
+              const holiday = holidayMap[key];
               const selected = selectedDate === key;
 
               return (
@@ -103,6 +107,7 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
                       <span
                         className={cn(
                           "inline-grid h-6 w-6 place-items-center rounded text-xs font-semibold sm:h-7 sm:w-7 sm:text-sm lg:h-8 lg:w-8 lg:text-[0.95rem]",
+                          holiday && !isToday(day) && "text-[#d95b43]",
                           isToday(day) && "bg-[#159a86] text-white",
                         )}
                       >
@@ -110,6 +115,17 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
                       </span>
                       {hasMemo ? <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#df7a2f]" title="메모 있음" /> : null}
                     </div>
+                    {holiday ? (
+                      <div
+                        className={cn(
+                          "mt-1 hidden truncate text-[11px] font-bold leading-4 sm:block lg:text-xs",
+                          muted ? "text-[#d38a7f]" : "text-[#d95b43]",
+                        )}
+                        title={holiday.name}
+                      >
+                        {holiday.name}
+                      </div>
+                    ) : null}
                     <div className="mt-auto flex min-h-2 items-end gap-0.5 sm:hidden">
                       {events.length > 0 ? (
                         <>
@@ -173,6 +189,7 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
               <div>
                 <p className="text-sm font-semibold text-[#159a86]">{format(parseDateKey(selectedDate), "yyyy.MM.dd")}</p>
                 <h2 className="text-xl font-bold">일정</h2>
+                {selectedHoliday ? <p className="mt-1 text-sm font-semibold text-[#d95b43]">{selectedHoliday.name}</p> : null}
               </div>
               <button
                 onClick={() => setSelectedDate(null)}

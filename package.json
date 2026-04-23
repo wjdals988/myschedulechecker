@@ -12,6 +12,7 @@
     "@tailwindcss/postcss": "latest",
     "date-fns": "latest",
     "firebase": "latest",
+    "korean-lunar-calendar": "^0.3.6",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",

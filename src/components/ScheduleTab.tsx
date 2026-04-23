@@ -11,6 +11,7 @@ import { CalendarIcon, PlusIcon } from "@/components/icons";
 import { useEventsByDate } from "@/hooks/useEventsByDate";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
 import { dateKey, isCurrentMonth, parseDateKey, todayKey } from "@/lib/dates";
+import { getKoreanHoliday, getKoreanHolidayMapForDates } from "@/lib/koreanHolidays";
 import { cn } from "@/lib/utils";
 
 export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) {
@@ -27,6 +28,10 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
   const rangeEnd = dateKey(days[days.length - 1] ?? selected);
   const { events: rangeEvents, byDate, loading: monthLoading } = useEventsInRange(roomId, rangeStart, rangeEnd);
   const monthEvents = rangeEvents.filter((event) => isCurrentMonth(parseDateKey(event.date), selectedMonth));
+  const holidayMap = getKoreanHolidayMapForDates(
+    Array.from({ length: 42 }, (_, index) => format(addDays(selectedMonth, index), "yyyy-MM-dd")),
+  );
+  const selectedHoliday = getKoreanHoliday(date);
 
   useEffect(() => {
     dayRefs.current.get(date)?.scrollIntoView({
@@ -74,6 +79,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
             const key = format(day, "yyyy-MM-dd");
             const active = key === date;
             const hasMemo = (byDate[key] ?? []).some((event) => event.memo);
+            const holiday = holidayMap[key];
 
             return (
               <Link
@@ -93,8 +99,12 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                     : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--accent)]",
                 )}
               >
-                <span className="text-[0.72rem] font-semibold">{format(day, "EEE", { locale: ko })}</span>
-                <span className="text-[1.45rem] font-bold leading-none">{format(day, "d")}</span>
+                <span className={cn("text-[0.72rem] font-semibold", holiday && !active && "text-[#d95b43]")}>
+                  {format(day, "EEE", { locale: ko })}
+                </span>
+                <span className={cn("text-[1.45rem] font-bold leading-none", holiday && !active && "text-[#d95b43]")}>
+                  {format(day, "d")}
+                </span>
                 {hasMemo ? (
                   <span
                     className={cn(
@@ -102,6 +112,15 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                       active ? "bg-[#f6c177]" : "bg-[#df7a2f]",
                     )}
                     title="메모 있음"
+                  />
+                ) : null}
+                {holiday ? (
+                  <span
+                    className={cn(
+                      "absolute left-2 top-2 h-1.5 w-1.5 rounded-full",
+                      active ? "bg-[#ffd1c8]" : "bg-[#d95b43]",
+                    )}
+                    title={holiday.name}
                   />
                 ) : null}
               </Link>
@@ -117,6 +136,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
               <div>
                 <p className="text-sm font-semibold text-[#159a86]">Schedule</p>
                 <h1 className="whitespace-nowrap text-2xl font-bold">{format(selected, "M월 d일 EEEE", { locale: ko })}</h1>
+                {selectedHoliday ? <p className="mt-1 text-sm font-semibold text-[#d95b43]">{selectedHoliday.name}</p> : null}
               </div>
 
               <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
