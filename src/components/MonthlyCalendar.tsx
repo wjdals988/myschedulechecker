@@ -12,6 +12,7 @@ import {
   isToday,
   monthTitle,
   parseDateKey,
+  weekdayLabel,
 } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { EventForm } from "@/components/EventForm";
@@ -29,8 +30,20 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
     }),
     [days, month],
   );
-  const { byDate, loading, error } = useEventsInRange(roomId, bounds.start, bounds.end);
+  const { events: rangeEvents, byDate, loading, error } = useEventsInRange(roomId, bounds.start, bounds.end);
   const selectedEvents = selectedDate ? byDate[selectedDate] ?? [] : [];
+  const monthEvents = useMemo(
+    () => rangeEvents.filter((event) => isCurrentMonth(parseDateKey(event.date), month)),
+    [rangeEvents, month],
+  );
+  const mobileAgendaGroups = useMemo(() => {
+    const grouped = monthEvents.reduce<Record<string, typeof monthEvents>>((acc, event) => {
+      acc[event.date] = [...(acc[event.date] ?? []), event];
+      return acc;
+    }, {});
+
+    return Object.entries(grouped).map(([date, events]) => ({ date, events }));
+  }, [monthEvents]);
 
   return (
     <main className="px-4 py-5">
@@ -64,7 +77,7 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
 
         {error ? <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
 
-        <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-[#687a75]">
+        <div className="grid grid-cols-7 gap-0.5 text-center text-xs font-semibold text-[#687a75] sm:gap-1">
           {["일", "월", "화", "수", "목", "금", "토"].map((day) => (
             <div key={day} className="py-2">
               {day}
@@ -72,7 +85,7 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
           {days.map((day) => {
             const key = dateKey(day);
             const events = byDate[key] ?? [];
@@ -84,8 +97,9 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
               <button
                 key={key}
                 onClick={() => setSelectedDate(key)}
+                aria-label={`${format(day, "yyyy.MM.dd")} 일정 ${events.length}개`}
                 className={cn(
-                  "aspect-square min-h-0 overflow-hidden rounded border bg-white p-1 text-left shadow-sm transition hover:border-[#159a86] sm:aspect-auto sm:min-h-24 sm:p-2",
+                  "h-[50px] min-h-0 overflow-hidden rounded-md border bg-white px-1 py-1 text-left shadow-sm transition hover:border-[#159a86] sm:aspect-auto sm:h-auto sm:min-h-24 sm:rounded sm:p-2",
                   muted && "bg-[#eef3f1] text-[#9aa8a4]",
                   isToday(day) && "border-[#159a86]",
                   selected && "ring-2 ring-[#159a86]",
@@ -103,11 +117,14 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
                     </span>
                     {hasMemo ? <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#df7a2f]" title="메모 있음" /> : null}
                   </div>
-                  <div className="mt-1 flex items-center gap-1 sm:hidden">
+                  <div className="mt-auto flex min-h-2 items-end gap-0.5 sm:hidden">
                     {events.length > 0 ? (
-                      <span className="rounded bg-[#eefaf7] px-1.5 py-0.5 text-[10px] font-semibold text-[#146c61]">
-                        {events.length}
-                      </span>
+                      <>
+                        {events.slice(0, 3).map((event) => (
+                          <span key={event.id} className="h-1.5 w-1.5 rounded-full bg-[#159a86]" />
+                        ))}
+                        {events.length > 3 ? <span className="text-[9px] font-bold leading-none text-[#146c61]">+</span> : null}
+                      </>
                     ) : null}
                   </div>
                 </div>
@@ -126,6 +143,62 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
             );
           })}
         </div>
+
+        <section className="border-t border-[#d8e3df] pt-4 sm:hidden">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-base font-bold text-[#14211f]">이번 달 일정</h2>
+            <span className="text-xs font-semibold text-[#687a75]">{loading ? "동기화 중" : `${monthEvents.length}개`}</span>
+          </div>
+
+          {loading ? (
+            <p className="mt-3 rounded-md border border-[#d8e3df] bg-white p-4 text-sm text-[#687a75]">
+              일정을 불러오는 중입니다.
+            </p>
+          ) : monthEvents.length === 0 ? (
+            <p className="mt-3 rounded-md border border-dashed border-[#c9d7d2] bg-white p-4 text-sm text-[#687a75]">
+              등록된 일정이 없습니다.
+            </p>
+          ) : (
+            <div className="mt-3 divide-y divide-[#d8e3df]">
+              {mobileAgendaGroups.map((group) => {
+                const groupDate = parseDateKey(group.date);
+
+                return (
+                  <div key={group.date} className="grid grid-cols-[3.25rem_1fr] gap-3 py-3">
+                    <button
+                      onClick={() => setSelectedDate(group.date)}
+                      className="rounded-md py-1 text-left transition hover:text-[#159a86]"
+                      aria-label={`${format(groupDate, "yyyy.MM.dd")} 일정 추가 또는 보기`}
+                    >
+                      <div className="text-xl font-bold leading-none">{dayLabel(groupDate)}</div>
+                      <div className="mt-1 text-xs font-semibold text-[#687a75]">{weekdayLabel(groupDate)}</div>
+                    </button>
+
+                    <div className="space-y-2">
+                      {group.events.map((event) => (
+                        <button
+                          key={event.id}
+                          onClick={() => router.push(`/rooms/${roomId}/schedule/${event.id}?date=${group.date}`)}
+                          className="block w-full rounded-md border border-[#d8e3df] bg-white p-3 text-left shadow-sm transition hover:border-[#159a86]"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="truncate font-semibold text-[#14211f]">{event.title}</div>
+                              <div className="mt-1 text-xs font-semibold text-[#687a75]">
+                                {event.startTime ?? "시간 없음"} {event.endTime ? `- ${event.endTime}` : ""}
+                              </div>
+                            </div>
+                            {event.memo ? <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#df7a2f]" /> : null}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
 
         {loading ? <p className="text-sm text-[#687a75]">월간 일정을 동기화하는 중입니다.</p> : null}
       </section>
