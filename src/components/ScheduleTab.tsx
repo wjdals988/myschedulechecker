@@ -95,7 +95,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                 className={cn(
                   "relative grid h-[4.9rem] min-w-[4.15rem] place-items-center rounded-lg border px-3 text-center shadow-[var(--shadow-soft)] transition sm:min-w-[4.4rem] xl:h-[5.1rem] xl:min-w-[4.7rem]",
                   active
-                    ? "border-[#14211f] bg-[#14211f] text-white"
+                    ? "border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]"
                     : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--accent)]",
                 )}
               >

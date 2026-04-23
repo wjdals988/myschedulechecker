@@ -5,6 +5,9 @@
   --foreground: #162220;
   --surface: rgba(255, 255, 255, 0.94);
   --surface-muted: #eef4f2;
+  --selection-surface: #dff2ec;
+  --selection-foreground: #162220;
+  --selection-border: #9fd3c7;
   --border: #d8e3df;
   --border-strong: #c5d3ce;
   --muted: #5f726f;
@@ -20,6 +23,9 @@ html[data-theme="dark"] {
   --foreground: #ecf5f2;
   --surface: rgba(21, 30, 32, 0.94);
   --surface-muted: #162022;
+  --selection-surface: #18312d;
+  --selection-foreground: #ecf5f2;
+  --selection-border: #2d5d55;
   --border: #243336;
   --border-strong: #314548;
   --muted: #9cadab;

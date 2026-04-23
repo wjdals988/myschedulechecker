@@ -99,8 +99,8 @@ export function PersonalMenu({
             onClick={() => setOpen(false)}
           />
 
-          <section className="fixed inset-x-0 bottom-[4.8rem] z-50 max-h-[78vh] overflow-hidden rounded-t-[22px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-soft)] sm:absolute sm:right-0 sm:top-12 sm:bottom-auto sm:w-[22rem] sm:max-h-[min(40rem,calc(100vh-5rem))] sm:rounded-lg">
-            <div className="max-h-[78vh] overflow-y-auto px-4 pb-5 pt-3 sm:max-h-none sm:px-4 sm:pb-4 sm:pt-4">
+          <section className="fixed inset-x-0 bottom-0 z-50 flex max-h-[min(88dvh,48rem)] flex-col overflow-hidden rounded-t-[22px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-soft)] sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-24 sm:w-[min(26rem,calc(100vw-2rem))] sm:max-h-[calc(100dvh-7rem)] sm:-translate-x-1/2 sm:rounded-2xl">
+            <div className="flex-1 overflow-y-auto px-4 pb-[calc(env(safe-area-inset-bottom)+1.2rem)] pt-3 sm:px-5 sm:py-5">
               <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-[var(--border-strong)] sm:hidden" />
 
               <div className="border-b border-[var(--border)] pb-4">
@@ -193,7 +193,7 @@ export function PersonalMenu({
                     </div>
                     <span className="text-xs font-semibold text-[var(--muted)]">{memberSummary}</span>
                   </div>
-                  <div className="max-h-56 overflow-y-auto px-2 py-2">
+                  <div className="px-2 py-2">
                     {error ? <p className="px-2 py-2 text-sm text-red-600">멤버를 불러오지 못했습니다.</p> : null}
                     {loading ? <p className="px-2 py-2 text-sm text-[var(--muted)]">멤버를 불러오는 중입니다.</p> : null}
                     {!loading && members.length === 0 ? <p className="px-2 py-2 text-sm text-[var(--muted)]">표시할 멤버가 없습니다.</p> : null}

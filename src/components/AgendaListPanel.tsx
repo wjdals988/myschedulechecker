@@ -69,7 +69,9 @@ export function AgendaListPanel({
               onClick={() => setFutureOnly(true)}
               className={cn(
                 "h-8 rounded px-2.5 text-xs font-semibold transition",
-                futureOnly ? "bg-[#14211f] text-white" : "text-[#52645f]",
+                futureOnly
+                  ? "border border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]"
+                  : "text-[#52645f]",
               )}
             >
               오늘 이후
@@ -78,7 +80,9 @@ export function AgendaListPanel({
               onClick={() => setFutureOnly(false)}
               className={cn(
                 "h-8 rounded px-2.5 text-xs font-semibold transition",
-                !futureOnly ? "bg-[#14211f] text-white" : "text-[#52645f]",
+                !futureOnly
+                  ? "border border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]"
+                  : "text-[#52645f]",
               )}
             >
               전체

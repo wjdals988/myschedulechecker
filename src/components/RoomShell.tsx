@@ -168,7 +168,7 @@ export function RoomShell({
             className={cn(
               "flex h-12 items-center justify-center gap-2 rounded-md text-sm font-semibold transition",
               pathname.endsWith("/calendar")
-                ? "bg-[#14211f] text-white"
+                ? "border border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]"
                 : "text-[var(--muted)] hover:bg-[var(--surface-muted)]",
             )}
           >
@@ -180,7 +180,7 @@ export function RoomShell({
             className={cn(
               "flex h-12 items-center justify-center gap-2 rounded-md text-sm font-semibold transition",
               pathname.includes("/schedule")
-                ? "bg-[#14211f] text-white"
+                ? "border border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]"
                 : "text-[var(--muted)] hover:bg-[var(--surface-muted)]",
             )}
           >

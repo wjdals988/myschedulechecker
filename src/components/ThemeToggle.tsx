@@ -36,12 +36,13 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
             type="button"
             onClick={() => setThemePreference(option.value)}
             className={cn(
-              "inline-flex items-center justify-center rounded-md font-semibold transition",
+              "inline-flex items-center justify-center rounded-md border border-transparent font-semibold transition",
               compact ? "h-9 w-9" : "h-9 gap-2 px-3 text-sm",
               active
-                ? "bg-[var(--foreground)] text-[var(--background)]"
+                ? "border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]"
                 : "text-[var(--muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]",
             )}
+            aria-pressed={active}
             aria-label={`${option.label} 모드`}
             title={option.label}
           >

@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.3.1",
+    releasedAt: "2026-04-24",
+    title: "테마 대비와 프로필 메뉴 레이아웃 보정",
+    changes: [
+      "라이트 모드에서는 선택된 컨트롤 글자가 어둡게, 다크 모드에서는 밝게 보이도록 선택 상태 색을 정리했습니다.",
+      "프로필 메뉴를 모바일 바텀시트와 데스크톱 중앙 시트로 재배치해 우측 들러붙는 느낌을 줄였습니다.",
+      "멤버 목록이 잘리지 않도록 메뉴 전체 스크롤 구조를 다시 정리했습니다.",
+    ],
+  },
+  {
     version: "0.3.0",
     releasedAt: "2026-04-24",
     title: "일정 화면과 버전 노출 정리",
