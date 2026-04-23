@@ -1,28 +1,29 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-const title = "정민나니 스케줄";
+const appTitle = "정민나니 스케줄";
+const browserTitle = "공유 일정 관리";
 const description = "함께 쓰는 공유 일정과 할 일 관리 앱";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://checker-jm.vercel.app"),
-  applicationName: title,
+  applicationName: appTitle,
   title: {
-    default: title,
-    template: `%s | ${title}`,
+    default: browserTitle,
+    template: `%s | ${browserTitle}`,
   },
   description,
   openGraph: {
-    title,
+    title: appTitle,
     description,
     url: "https://checker-jm.vercel.app",
-    siteName: title,
+    siteName: appTitle,
     locale: "ko_KR",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title,
+    title: appTitle,
     description,
   },
 };
