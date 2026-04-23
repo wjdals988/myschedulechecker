@@ -37,36 +37,39 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
   }, [date]);
 
   return (
-    <main className="flex min-h-[calc(100vh-136px)] flex-col">
-      <section className="sticky top-[65px] z-10 border-b border-[#d8e3df] bg-[#f8faf9] px-4 py-3">
-        <div className="mb-3 flex items-center justify-between gap-3">
+    <main className="flex min-h-[calc(100vh-148px)] flex-col">
+      <section className="sticky top-[72px] z-10 border-b border-[var(--border)] bg-[var(--background)] px-4 py-4 backdrop-blur">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold text-[#159a86]">Month</p>
-            <h2 className="text-lg font-bold text-[#14211f]">{format(selectedMonth, "yyyy년 M월", { locale: ko })}</h2>
+            <p className="app-kicker text-[0.72rem] font-bold">Month</p>
+            <h2 className="mt-1 text-xl font-bold text-[var(--foreground)] sm:text-[1.5rem]">
+              {format(selectedMonth, "yyyy년 M월", { locale: ko })}
+            </h2>
           </div>
-          <div className="flex gap-1.5">
+
+          <div className="flex gap-2">
             <Link
               href={`/rooms/${roomId}/schedule?date=${previousMonthDate}`}
-              className="h-9 whitespace-nowrap rounded-md border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
+              className="app-button-secondary inline-flex h-10 items-center justify-center whitespace-nowrap px-3 text-sm font-semibold shadow-[var(--shadow-soft)] hover:border-[var(--accent)]"
             >
               이전달
             </Link>
             <Link
               href={`/rooms/${roomId}/schedule?date=${todayKey()}`}
-              className="h-9 whitespace-nowrap rounded-md border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
+              className="app-button-secondary inline-flex h-10 items-center justify-center whitespace-nowrap px-3 text-sm font-semibold shadow-[var(--shadow-soft)] hover:border-[var(--accent)]"
             >
               오늘
             </Link>
             <Link
               href={`/rooms/${roomId}/schedule?date=${nextMonthDate}`}
-              className="h-9 whitespace-nowrap rounded-md border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
+              className="app-button-secondary inline-flex h-10 items-center justify-center whitespace-nowrap px-3 text-sm font-semibold shadow-[var(--shadow-soft)] hover:border-[var(--accent)]"
             >
               다음달
             </Link>
           </div>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2.5 overflow-x-auto pb-2">
           {days.map((day) => {
             const key = format(day, "yyyy-MM-dd");
             const active = key === date;
@@ -84,14 +87,14 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                   }
                 }}
                 className={cn(
-                  "relative grid h-16 min-w-14 place-items-center rounded border px-2 text-center transition",
+                  "relative grid h-[4.75rem] min-w-[4.15rem] place-items-center rounded-lg border px-3 text-center shadow-[var(--shadow-soft)] transition",
                   active
                     ? "border-[#14211f] bg-[#14211f] text-white"
-                    : "border-[#d8e3df] bg-white text-[#52645f] hover:border-[#159a86]",
+                    : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--accent)]",
                 )}
               >
-                <span className="text-xs font-semibold">{format(day, "EEE", { locale: ko })}</span>
-                <span className="text-lg font-bold">{format(day, "d")}</span>
+                <span className="text-[0.72rem] font-semibold">{format(day, "EEE", { locale: ko })}</span>
+                <span className="text-[1.45rem] font-bold leading-none">{format(day, "d")}</span>
                 {hasMemo ? (
                   <span
                     className={cn(
@@ -115,6 +118,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                 <p className="text-sm font-semibold text-[#159a86]">Schedule</p>
                 <h1 className="whitespace-nowrap text-2xl font-bold">{format(selected, "M월 d일 EEEE", { locale: ko })}</h1>
               </div>
+
               <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
                 <button
                   onClick={() => setQuickAddOpen((open) => !open)}
@@ -158,7 +162,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                     onClick={() => setQuickAddOpen(false)}
                     className="h-8 rounded border border-[#c9d7d2] px-2.5 text-xs font-semibold"
                   >
-                    접기
+                    닫기
                   </button>
                 </div>
                 <EventForm roomId={roomId} date={date} onCreated={() => setQuickAddOpen(false)} />
@@ -180,7 +184,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
           </div>
 
           <aside className="hidden lg:block">
-            <div className="sticky top-[184px] max-h-[calc(100vh-210px)] overflow-y-auto border-l border-[#d8e3df] pl-5">
+            <div className="sticky top-[216px] max-h-[calc(100vh-240px)] overflow-y-auto border-l border-[#d8e3df] pl-5">
               <AgendaListPanel
                 roomId={roomId}
                 title="이번 달 일정"

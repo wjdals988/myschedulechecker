@@ -94,117 +94,121 @@ export function PersonalMenu({
         <>
           <button
             type="button"
-            className="fixed inset-0 z-40 cursor-default bg-black/18 backdrop-blur-[1px]"
+            className="fixed inset-0 z-40 bg-black/24 backdrop-blur-[1.5px]"
             aria-label="개인 메뉴 닫기"
             onClick={() => setOpen(false)}
           />
 
-          <section className="fixed inset-x-3 bottom-[5.5rem] top-[5rem] z-50 overflow-y-auto rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-soft)] sm:absolute sm:right-0 sm:top-12 sm:bottom-auto sm:w-[22rem] sm:max-h-[min(40rem,calc(100vh-5rem))]">
-            <div className="border-b border-[var(--border)] pb-4">
-              <p className="app-kicker text-xs font-bold">Profile</p>
-              <h2 className="mt-2 truncate text-lg font-bold text-[var(--foreground)]">{displayName}</h2>
-              <p className="mt-2 text-xs font-semibold text-[var(--muted)]">
-                {profile.label} · 초대 코드 <span className="tracking-[0.14em] text-[var(--accent)]">{room.inviteCode}</span>
-              </p>
-            </div>
+          <section className="fixed inset-x-0 bottom-[4.8rem] z-50 max-h-[78vh] overflow-hidden rounded-t-[22px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-soft)] sm:absolute sm:right-0 sm:top-12 sm:bottom-auto sm:w-[22rem] sm:max-h-[min(40rem,calc(100vh-5rem))] sm:rounded-lg">
+            <div className="max-h-[78vh] overflow-y-auto px-4 pb-5 pt-3 sm:max-h-none sm:px-4 sm:pb-4 sm:pt-4">
+              <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-[var(--border-strong)] sm:hidden" />
 
-            <div className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 gap-2">
-                <Link
-                  href="/"
-                  onClick={() => setOpen(false)}
-                  className="app-button-secondary inline-flex h-10 items-center justify-center gap-2 px-3 text-sm font-semibold hover:border-[var(--accent)]"
-                >
-                  <HomeIcon className="h-4 w-4" />
-                  홈
-                </Link>
-                <Link
-                  href={todayScheduleHref}
-                  onClick={() => setOpen(false)}
-                  className="app-button-secondary inline-flex h-10 items-center justify-center gap-2 px-3 text-sm font-semibold hover:border-[var(--accent)]"
-                >
-                  <CalendarIcon className="h-4 w-4" />
-                  오늘
-                </Link>
+              <div className="border-b border-[var(--border)] pb-4">
+                <p className="app-kicker text-xs font-bold">Profile</p>
+                <h2 className="mt-2 truncate text-lg font-bold text-[var(--foreground)]">{displayName}</h2>
+                <p className="mt-2 text-xs font-semibold text-[var(--muted)]">
+                  {profile.label} · 초대 코드 <span className="tracking-[0.14em] text-[var(--accent)]">{room.inviteCode}</span>
+                </p>
               </div>
 
-              <button
-                type="button"
-                onClick={onCopyShareLink}
-                className="app-button-primary inline-flex h-10 w-full items-center justify-center gap-2 px-3 text-sm font-semibold"
-              >
-                <ShareIcon className="h-4 w-4" />
-                {shareStatus === "copied" ? "초대 링크 복사됨" : shareStatus === "failed" ? "복사 실패" : "초대 링크 복사"}
-              </button>
-
-              <div className="app-subtle-panel p-3">
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-[var(--foreground)]">테마</p>
-                  <span className="text-xs font-semibold text-[var(--muted)]">라이트 · 다크 · 시스템</span>
-                </div>
-                <ThemeToggle />
-              </div>
-
-              <div className="app-subtle-panel p-3">
-                <label className="block text-xs font-semibold text-[var(--muted)]" htmlFor="nickname">
-                  닉네임
-                </label>
-                <div className="mt-2 flex gap-2">
-                  <input
-                    id="nickname"
-                    value={nicknameDraft}
-                    onChange={(event) => setNicknameDraft(event.target.value)}
-                    maxLength={18}
-                    placeholder="닉네임 입력"
-                    className="app-input h-10 min-w-0 flex-1 px-3 text-sm"
-                  />
-                  <button
-                    type="button"
-                    onClick={saveNickname}
-                    className="inline-flex h-10 items-center justify-center rounded-lg bg-[var(--accent)] px-3 text-sm font-semibold text-[#0f1716]"
+              <div className="space-y-4 pt-4">
+                <div className="grid grid-cols-2 gap-2">
+                  <Link
+                    href="/"
+                    onClick={() => setOpen(false)}
+                    className="app-button-secondary inline-flex h-10 items-center justify-center gap-2 px-3 text-sm font-semibold hover:border-[var(--accent)]"
                   >
-                    저장
-                  </button>
-                </div>
-                <div className="mt-2 flex items-center justify-between gap-3">
-                  <button
-                    type="button"
-                    onClick={refreshLabel}
-                    className="text-xs font-semibold text-[var(--accent)] transition hover:opacity-80"
+                    <HomeIcon className="h-4 w-4" />
+                    홈
+                  </Link>
+                  <Link
+                    href={todayScheduleHref}
+                    onClick={() => setOpen(false)}
+                    className="app-button-secondary inline-flex h-10 items-center justify-center gap-2 px-3 text-sm font-semibold hover:border-[var(--accent)]"
                   >
-                    표시 아이콘 바꾸기
-                  </button>
-                  {profileStatus !== "idle" ? (
-                    <span className={cn("text-xs font-semibold", profileStatus === "saved" ? "text-[var(--accent)]" : "text-red-600")}>
-                      {profileStatus === "saved" ? "저장됨" : "저장 실패"}
-                    </span>
-                  ) : null}
+                    <CalendarIcon className="h-4 w-4" />
+                    오늘
+                  </Link>
                 </div>
-              </div>
 
-              <div className="app-subtle-panel overflow-hidden">
-                <div className="flex items-center justify-between border-b border-[var(--border)] px-3 py-2.5">
-                  <div className="inline-flex items-center gap-2 text-sm font-bold text-[var(--foreground)]">
-                    <UsersIcon className="h-4 w-4" />
-                    멤버
+                <button
+                  type="button"
+                  onClick={onCopyShareLink}
+                  className="app-button-primary inline-flex h-10 w-full items-center justify-center gap-2 px-3 text-sm font-semibold"
+                >
+                  <ShareIcon className="h-4 w-4" />
+                  {shareStatus === "copied" ? "초대 링크 복사됨" : shareStatus === "failed" ? "복사 실패" : "초대 링크 복사"}
+                </button>
+
+                <div className="app-subtle-panel p-3">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-[var(--foreground)]">테마</p>
+                    <span className="text-xs font-semibold text-[var(--muted)]">라이트 · 다크 · 시스템</span>
                   </div>
-                  <span className="text-xs font-semibold text-[var(--muted)]">{memberSummary}</span>
+                  <ThemeToggle />
                 </div>
-                <div className="max-h-56 overflow-y-auto px-2 py-2">
-                  {error ? <p className="px-2 py-2 text-sm text-red-600">멤버를 불러오지 못했습니다.</p> : null}
-                  {loading ? <p className="px-2 py-2 text-sm text-[var(--muted)]">멤버를 불러오는 중입니다.</p> : null}
-                  {!loading && members.length === 0 ? <p className="px-2 py-2 text-sm text-[var(--muted)]">표시할 멤버가 없습니다.</p> : null}
-                  {members.map((member) => (
-                    <div key={member.id} className="flex items-center justify-between gap-3 rounded-md px-2 py-2 hover:bg-[var(--surface)]">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-[var(--foreground)]">{profileDisplayName(member)}</p>
-                        {member.nickname ? <p className="text-xs text-[var(--muted)]">{member.label}</p> : null}
-                      </div>
-                      {member.id === uid ? (
-                        <span className="rounded-md bg-[var(--accent-weak)] px-2 py-1 text-xs font-bold text-[var(--accent)]">나</span>
-                      ) : null}
+
+                <div className="app-subtle-panel p-3">
+                  <label className="block text-xs font-semibold text-[var(--muted)]" htmlFor="nickname">
+                    닉네임
+                  </label>
+                  <div className="mt-2 flex gap-2">
+                    <input
+                      id="nickname"
+                      value={nicknameDraft}
+                      onChange={(event) => setNicknameDraft(event.target.value)}
+                      maxLength={18}
+                      placeholder="닉네임 입력"
+                      className="app-input h-10 min-w-0 flex-1 px-3 text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={saveNickname}
+                      className="inline-flex h-10 items-center justify-center rounded-lg bg-[var(--accent)] px-3 text-sm font-semibold text-[#0f1716]"
+                    >
+                      저장
+                    </button>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={refreshLabel}
+                      className="text-xs font-semibold text-[var(--accent)] transition hover:opacity-80"
+                    >
+                      표시 아이콘 바꾸기
+                    </button>
+                    {profileStatus !== "idle" ? (
+                      <span className={cn("text-xs font-semibold", profileStatus === "saved" ? "text-[var(--accent)]" : "text-red-600")}>
+                        {profileStatus === "saved" ? "저장됨" : "저장 실패"}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="app-subtle-panel overflow-hidden">
+                  <div className="flex items-center justify-between border-b border-[var(--border)] px-3 py-2.5">
+                    <div className="inline-flex items-center gap-2 text-sm font-bold text-[var(--foreground)]">
+                      <UsersIcon className="h-4 w-4" />
+                      멤버
                     </div>
-                  ))}
+                    <span className="text-xs font-semibold text-[var(--muted)]">{memberSummary}</span>
+                  </div>
+                  <div className="max-h-56 overflow-y-auto px-2 py-2">
+                    {error ? <p className="px-2 py-2 text-sm text-red-600">멤버를 불러오지 못했습니다.</p> : null}
+                    {loading ? <p className="px-2 py-2 text-sm text-[var(--muted)]">멤버를 불러오는 중입니다.</p> : null}
+                    {!loading && members.length === 0 ? <p className="px-2 py-2 text-sm text-[var(--muted)]">표시할 멤버가 없습니다.</p> : null}
+                    {members.map((member) => (
+                      <div key={member.id} className="flex items-center justify-between gap-3 rounded-md px-2 py-2 hover:bg-[var(--surface)]">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-[var(--foreground)]">{profileDisplayName(member)}</p>
+                          {member.nickname ? <p className="text-xs text-[var(--muted)]">{member.label}</p> : null}
+                        </div>
+                        {member.id === uid ? (
+                          <span className="rounded-md bg-[var(--accent-weak)] px-2 py-1 text-xs font-bold text-[var(--accent)]">나</span>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
