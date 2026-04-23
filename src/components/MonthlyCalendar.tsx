@@ -3,6 +3,9 @@
 import { addMonths, format, subMonths } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { AgendaListPanel } from "@/components/AgendaListPanel";
+import { EventForm } from "@/components/EventForm";
+import { PlusIcon } from "@/components/icons";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
 import {
   dateKey,
@@ -12,11 +15,8 @@ import {
   isToday,
   monthTitle,
   parseDateKey,
-  weekdayLabel,
 } from "@/lib/dates";
 import { cn } from "@/lib/utils";
-import { EventForm } from "@/components/EventForm";
-import { PlusIcon } from "@/components/icons";
 
 export function MonthlyCalendar({ roomId }: { roomId: string }) {
   const router = useRouter();
@@ -36,172 +36,131 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
     () => rangeEvents.filter((event) => isCurrentMonth(parseDateKey(event.date), month)),
     [rangeEvents, month],
   );
-  const mobileAgendaGroups = useMemo(() => {
-    const grouped = monthEvents.reduce<Record<string, typeof monthEvents>>((acc, event) => {
-      acc[event.date] = [...(acc[event.date] ?? []), event];
-      return acc;
-    }, {});
-
-    return Object.entries(grouped).map(([date, events]) => ({ date, events }));
-  }, [monthEvents]);
 
   return (
     <main className="px-4 py-5">
-      <section className="space-y-4">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold text-[#159a86]">Calendar</p>
-            <h1 className="text-2xl font-bold">{monthTitle(month)}</h1>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setMonth(subMonths(month, 1))}
-              className="h-10 rounded border border-[#c9d7d2] bg-white px-3 text-sm font-semibold"
-            >
-              이전
-            </button>
-            <button
-              onClick={() => setMonth(new Date())}
-              className="h-10 rounded border border-[#c9d7d2] bg-white px-3 text-sm font-semibold"
-            >
-              오늘
-            </button>
-            <button
-              onClick={() => setMonth(addMonths(month, 1))}
-              className="h-10 rounded border border-[#c9d7d2] bg-white px-3 text-sm font-semibold"
-            >
-              다음
-            </button>
-          </div>
-        </div>
-
-        {error ? <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
-
-        <div className="grid grid-cols-7 gap-0.5 text-center text-xs font-semibold text-[#687a75] sm:gap-1">
-          {["일", "월", "화", "수", "목", "금", "토"].map((day) => (
-            <div key={day} className="py-2">
-              {day}
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
-          {days.map((day) => {
-            const key = dateKey(day);
-            const events = byDate[key] ?? [];
-            const muted = !isCurrentMonth(day, month);
-            const hasMemo = events.some((event) => event.memo);
-            const selected = selectedDate === key;
-
-            return (
-              <button
-                key={key}
-                onClick={() => setSelectedDate(key)}
-                aria-label={`${format(day, "yyyy.MM.dd")} 일정 ${events.length}개`}
-                className={cn(
-                  "h-[50px] min-h-0 overflow-hidden rounded-md border bg-white px-1 py-1 text-left shadow-sm transition hover:border-[#159a86] sm:aspect-auto sm:h-auto sm:min-h-24 sm:rounded sm:p-2",
-                  muted && "bg-[#eef3f1] text-[#9aa8a4]",
-                  isToday(day) && "border-[#159a86]",
-                  selected && "ring-2 ring-[#159a86]",
-                )}
-              >
-                <div className="flex h-full flex-col justify-between sm:h-auto sm:block">
-                  <div className="flex items-start justify-between gap-1">
-                    <span
-                      className={cn(
-                        "inline-grid h-6 w-6 place-items-center rounded text-xs font-semibold sm:h-7 sm:w-7 sm:text-sm",
-                        isToday(day) && "bg-[#159a86] text-white",
-                      )}
-                    >
-                      {dayLabel(day)}
-                    </span>
-                    {hasMemo ? <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#df7a2f]" title="메모 있음" /> : null}
-                  </div>
-                  <div className="mt-auto flex min-h-2 items-end gap-0.5 sm:hidden">
-                    {events.length > 0 ? (
-                      <>
-                        {events.slice(0, 3).map((event) => (
-                          <span key={event.id} className="h-1.5 w-1.5 rounded-full bg-[#159a86]" />
-                        ))}
-                        {events.length > 3 ? <span className="text-[9px] font-bold leading-none text-[#146c61]">+</span> : null}
-                      </>
-                    ) : null}
-                  </div>
-                </div>
-                <div className="mt-2 hidden max-h-14 space-y-1 overflow-hidden sm:block">
-                  {events.slice(0, 2).map((event) => (
-                    <div key={event.id} className="rounded bg-[#eefaf7] px-2 py-1 text-xs font-semibold text-[#146c61]">
-                      <div className="truncate">{event.title}</div>
-                      {event.startTime ? <div className="mt-0.5 text-[10px] text-[#4f7f76]">{event.startTime}</div> : null}
-                    </div>
-                  ))}
-                  {events.length > 2 ? (
-                    <div className="text-xs font-semibold text-[#687a75]">+{events.length - 2}</div>
-                  ) : null}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        <section className="border-t border-[#d8e3df] pt-4 sm:hidden">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="space-y-4">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-base font-bold text-[#14211f]">이번 달 일정</h2>
-            <span className="text-xs font-semibold text-[#687a75]">{loading ? "동기화 중" : `${monthEvents.length}개`}</span>
+            <div>
+              <p className="text-sm font-semibold text-[#159a86]">Calendar</p>
+              <h1 className="text-2xl font-bold">{monthTitle(month)}</h1>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setMonth(subMonths(month, 1))}
+                className="h-10 rounded border border-[#c9d7d2] bg-white px-3 text-sm font-semibold"
+              >
+                이전
+              </button>
+              <button
+                onClick={() => setMonth(new Date())}
+                className="h-10 rounded border border-[#c9d7d2] bg-white px-3 text-sm font-semibold"
+              >
+                오늘
+              </button>
+              <button
+                onClick={() => setMonth(addMonths(month, 1))}
+                className="h-10 rounded border border-[#c9d7d2] bg-white px-3 text-sm font-semibold"
+              >
+                다음
+              </button>
+            </div>
           </div>
 
-          {loading ? (
-            <p className="mt-3 rounded-md border border-[#d8e3df] bg-white p-4 text-sm text-[#687a75]">
-              일정을 불러오는 중입니다.
-            </p>
-          ) : monthEvents.length === 0 ? (
-            <p className="mt-3 rounded-md border border-dashed border-[#c9d7d2] bg-white p-4 text-sm text-[#687a75]">
-              등록된 일정이 없습니다.
-            </p>
-          ) : (
-            <div className="mt-3 divide-y divide-[#d8e3df]">
-              {mobileAgendaGroups.map((group) => {
-                const groupDate = parseDateKey(group.date);
+          {error ? <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
 
-                return (
-                  <div key={group.date} className="grid grid-cols-[3.25rem_1fr] gap-3 py-3">
-                    <button
-                      onClick={() => setSelectedDate(group.date)}
-                      className="rounded-md py-1 text-left transition hover:text-[#159a86]"
-                      aria-label={`${format(groupDate, "yyyy.MM.dd")} 일정 추가 또는 보기`}
-                    >
-                      <div className="text-xl font-bold leading-none">{dayLabel(groupDate)}</div>
-                      <div className="mt-1 text-xs font-semibold text-[#687a75]">{weekdayLabel(groupDate)}</div>
-                    </button>
+          <div className="grid grid-cols-7 gap-0.5 text-center text-xs font-semibold text-[#687a75] sm:gap-1">
+            {["일", "월", "화", "수", "목", "금", "토"].map((day) => (
+              <div key={day} className="py-2">
+                {day}
+              </div>
+            ))}
+          </div>
 
-                    <div className="space-y-2">
-                      {group.events.map((event) => (
-                        <button
-                          key={event.id}
-                          onClick={() => router.push(`/rooms/${roomId}/schedule/${event.id}?date=${group.date}`)}
-                          className="block w-full rounded-md border border-[#d8e3df] bg-white p-3 text-left shadow-sm transition hover:border-[#159a86]"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0">
-                              <div className="truncate font-semibold text-[#14211f]">{event.title}</div>
-                              <div className="mt-1 text-xs font-semibold text-[#687a75]">
-                                {event.startTime ?? "시간 없음"} {event.endTime ? `- ${event.endTime}` : ""}
-                              </div>
-                            </div>
-                            {event.memo ? <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#df7a2f]" /> : null}
-                          </div>
-                        </button>
-                      ))}
+          <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
+            {days.map((day) => {
+              const key = dateKey(day);
+              const events = byDate[key] ?? [];
+              const muted = !isCurrentMonth(day, month);
+              const hasMemo = events.some((event) => event.memo);
+              const selected = selectedDate === key;
+
+              return (
+                <button
+                  key={key}
+                  onClick={() => setSelectedDate(key)}
+                  aria-label={`${format(day, "yyyy.MM.dd")} 일정 ${events.length}개`}
+                  className={cn(
+                    "h-[50px] min-h-0 overflow-hidden rounded-md border bg-white px-1 py-1 text-left shadow-sm transition hover:border-[#159a86] sm:aspect-auto sm:h-auto sm:min-h-24 sm:rounded sm:p-2",
+                    muted && "bg-[#eef3f1] text-[#9aa8a4]",
+                    isToday(day) && "border-[#159a86]",
+                    selected && "ring-2 ring-[#159a86]",
+                  )}
+                >
+                  <div className="flex h-full flex-col justify-between sm:h-auto sm:block">
+                    <div className="flex items-start justify-between gap-1">
+                      <span
+                        className={cn(
+                          "inline-grid h-6 w-6 place-items-center rounded text-xs font-semibold sm:h-7 sm:w-7 sm:text-sm",
+                          isToday(day) && "bg-[#159a86] text-white",
+                        )}
+                      >
+                        {dayLabel(day)}
+                      </span>
+                      {hasMemo ? <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#df7a2f]" title="메모 있음" /> : null}
+                    </div>
+                    <div className="mt-auto flex min-h-2 items-end gap-0.5 sm:hidden">
+                      {events.length > 0 ? (
+                        <>
+                          {events.slice(0, 3).map((event) => (
+                            <span key={event.id} className="h-1.5 w-1.5 rounded-full bg-[#159a86]" />
+                          ))}
+                          {events.length > 3 ? <span className="text-[9px] font-bold leading-none text-[#146c61]">+</span> : null}
+                        </>
+                      ) : null}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
+                  <div className="mt-2 hidden max-h-14 space-y-1 overflow-hidden sm:block">
+                    {events.slice(0, 2).map((event) => (
+                      <div key={event.id} className="rounded bg-[#eefaf7] px-2 py-1 text-xs font-semibold text-[#146c61]">
+                        <div className="truncate">{event.title}</div>
+                        {event.startTime ? <div className="mt-0.5 text-[10px] text-[#4f7f76]">{event.startTime}</div> : null}
+                      </div>
+                    ))}
+                    {events.length > 2 ? <div className="text-xs font-semibold text-[#687a75]">+{events.length - 2}</div> : null}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <AgendaListPanel
+            roomId={roomId}
+            title="이번 달 일정"
+            events={monthEvents}
+            loading={loading}
+            grouped
+            onDateSelect={setSelectedDate}
+            className="border-t border-[#d8e3df] pt-4 lg:hidden"
+          />
+
+          {loading ? <p className="text-sm text-[#687a75]">월간 일정을 동기화하는 중입니다.</p> : null}
         </section>
 
-        {loading ? <p className="text-sm text-[#687a75]">월간 일정을 동기화하는 중입니다.</p> : null}
-      </section>
+        <aside className="hidden lg:block">
+          <div className="sticky top-[92px] max-h-[calc(100vh-120px)] overflow-y-auto border-l border-[#d8e3df] pl-5">
+            <AgendaListPanel
+              roomId={roomId}
+              title="이번 달 일정"
+              events={monthEvents}
+              loading={loading}
+              grouped
+              onDateSelect={setSelectedDate}
+            />
+          </div>
+        </aside>
+      </div>
 
       {selectedDate ? (
         <div className="fixed inset-0 z-40 flex items-end bg-black/45 p-0 sm:block sm:p-4">
