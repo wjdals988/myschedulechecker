@@ -43,7 +43,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
 
   return (
     <main className="flex min-h-[calc(100vh-148px)] flex-col">
-      <section className="sticky top-[72px] z-10 border-b border-[var(--border)] bg-[var(--background)] px-4 py-4 backdrop-blur">
+      <section className="sticky top-[72px] z-10 border-b border-[var(--border)] bg-[var(--background)] px-4 py-4 backdrop-blur lg:px-6 lg:py-5">
         <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="app-kicker text-[0.72rem] font-bold">Month</p>
@@ -74,7 +74,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
           </div>
         </div>
 
-        <div className="flex gap-2.5 overflow-x-auto pb-2">
+        <div className="flex gap-3 overflow-x-auto pb-2">
           {days.map((day) => {
             const key = format(day, "yyyy-MM-dd");
             const active = key === date;
@@ -93,7 +93,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                   }
                 }}
                 className={cn(
-                  "relative grid h-[4.75rem] min-w-[4.15rem] place-items-center rounded-lg border px-3 text-center shadow-[var(--shadow-soft)] transition",
+                  "relative grid h-[4.9rem] min-w-[4.15rem] place-items-center rounded-lg border px-3 text-center shadow-[var(--shadow-soft)] transition sm:min-w-[4.4rem] xl:h-[5.1rem] xl:min-w-[4.7rem]",
                   active
                     ? "border-[#14211f] bg-[#14211f] text-white"
                     : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--accent)]",
@@ -129,8 +129,8 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
         </div>
       </section>
 
-      <section className="flex-1 px-4 py-5">
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <section className="flex-1 px-4 py-5 lg:px-6 lg:py-6">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_380px]">
           <div className="space-y-4">
             <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -203,8 +203,8 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
             />
           </div>
 
-          <aside className="hidden lg:block">
-            <div className="sticky top-[216px] max-h-[calc(100vh-240px)] overflow-y-auto border-l border-[#d8e3df] pl-5">
+          <aside className="hidden xl:block">
+            <div className="sticky top-[224px] max-h-[calc(100vh-248px)] overflow-y-auto border-l border-[#d8e3df] pl-6">
               <AgendaListPanel
                 roomId={roomId}
                 title="이번 달 일정"

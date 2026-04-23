@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PersonalMenu } from "@/components/PersonalMenu";
 import { ProfilePicker } from "@/components/ProfilePicker";
+import { ReleaseNotesButton } from "@/components/ReleaseNotesButton";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
-import { APP_VERSION } from "@/lib/appMeta";
 import { todayKey } from "@/lib/dates";
 import { getDb } from "@/lib/firebase";
 import { saveRecentRoom } from "@/lib/recentRooms";
@@ -110,7 +110,8 @@ export function RoomShell({
 
   const scheduleHref = `/rooms/${roomId}/schedule?date=${todayKey()}`;
   const isCalendarPage = pathname.endsWith("/calendar");
-  const contentWidthClassName = isCalendarPage ? "max-w-[90rem]" : "max-w-5xl";
+  const isScheduleListPage = pathname.endsWith("/schedule");
+  const contentWidthClassName = isCalendarPage || isScheduleListPage ? "max-w-[92rem]" : "max-w-5xl";
 
   return (
     <div className="min-h-screen bg-[var(--background)] pb-24 text-[var(--foreground)]">
@@ -118,10 +119,12 @@ export function RoomShell({
         <div className={cn("mx-auto flex flex-wrap items-start justify-between gap-3 sm:items-center", contentWidthClassName)}>
           <div className="min-w-0">
             <p className="truncate text-[1.1rem] font-bold text-[var(--foreground)]">{room.name}</p>
-            <p className="text-xs text-[var(--muted)]">
-              초대 코드 <span className="font-semibold tracking-[0.16em] text-[var(--accent)]">{room.inviteCode}</span>
-              <span className="ml-2 text-[var(--muted-soft)]">v{APP_VERSION}</span>
-            </p>
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
+              <p>
+                초대 코드 <span className="font-semibold tracking-[0.16em] text-[var(--accent)]">{room.inviteCode}</span>
+              </p>
+              <ReleaseNotesButton />
+            </div>
           </div>
 
           <div className="flex shrink-0 items-center gap-2 self-start sm:self-auto">
