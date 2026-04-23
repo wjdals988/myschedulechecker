@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { themeInitScript } from "@/lib/theme";
 
 const appTitle = "정민나니 스케줄";
 const browserTitle = "공유 일정 관리";
@@ -34,8 +35,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
-      <body>{children}</body>
+    <html lang="ko" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript() }} />
+      </head>
+      <body className="antialiased">
+        {children}
+      </body>
     </html>
   );
 }

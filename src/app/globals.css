@@ -1,22 +1,58 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8faf9;
-  --foreground: #14211f;
+  --background: #f3f6f5;
+  --foreground: #162220;
+  --surface: rgba(255, 255, 255, 0.94);
+  --surface-muted: #eef4f2;
+  --border: #d8e3df;
+  --border-strong: #c5d3ce;
+  --muted: #5f726f;
+  --muted-soft: #8b9b97;
+  --accent: #149a86;
+  --accent-weak: #ebf8f4;
+  --focus-ring: rgba(20, 154, 134, 0.18);
+  --shadow-soft: 0 14px 36px rgba(20, 33, 31, 0.08);
+}
+
+html[data-theme="dark"] {
+  --background: #0f1516;
+  --foreground: #ecf5f2;
+  --surface: rgba(21, 30, 32, 0.94);
+  --surface-muted: #162022;
+  --border: #243336;
+  --border-strong: #314548;
+  --muted: #9cadab;
+  --muted-soft: #738684;
+  --accent: #49d1b4;
+  --accent-weak: #11332d;
+  --focus-ring: rgba(73, 209, 180, 0.18);
+  --shadow-soft: 0 18px 48px rgba(0, 0, 0, 0.32);
+  color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: Arial, Helvetica, sans-serif;
+  --font-sans:
+    "Pretendard Variable",
+    "Pretendard",
+    "Inter",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 }
 
 * {
   box-sizing: border-box;
+  min-width: 0;
 }
 
 html {
   min-height: 100%;
+  font-size: 15px;
   background: var(--background);
 }
 
@@ -24,13 +60,26 @@ body {
   min-height: 100%;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    "Pretendard Variable",
+    "Pretendard",
+    "Inter",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
+  color: inherit;
 }
 
 button {
@@ -39,4 +88,117 @@ button {
 
 button:disabled {
   cursor: not-allowed;
+}
+
+a,
+button,
+input,
+textarea,
+select {
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+::selection {
+  background: var(--accent);
+  color: white;
+}
+
+.app-panel {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 8px;
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+}
+
+.app-subtle-panel {
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  border-radius: 8px;
+}
+
+.app-input {
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--foreground);
+  border-radius: 8px;
+}
+
+.app-input::placeholder {
+  color: var(--muted-soft);
+}
+
+.app-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.app-button-primary {
+  border-radius: 8px;
+  background: var(--foreground);
+  color: var(--background);
+}
+
+.app-button-secondary {
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--foreground);
+}
+
+.app-kicker {
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+html[data-theme="dark"] .bg-\[\#f8faf9\] {
+  background-color: var(--background) !important;
+}
+
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] .bg-white\/95,
+html[data-theme="dark"] .bg-\[\#f2f5f4\],
+html[data-theme="dark"] .bg-\[\#eef3f1\] {
+  background-color: var(--surface) !important;
+}
+
+html[data-theme="dark"] .bg-\[\#eefaf7\],
+html[data-theme="dark"] .bg-\[\#edf5f2\] {
+  background-color: var(--accent-weak) !important;
+}
+
+html[data-theme="dark"] .border-\[\#d8e3df\],
+html[data-theme="dark"] .border-\[\#c9d7d2\],
+html[data-theme="dark"] .border-\[\#b8ded4\] {
+  border-color: var(--border) !important;
+}
+
+html[data-theme="dark"] .text-\[\#14211f\],
+html[data-theme="dark"] .text-\[\#273f3a\],
+html[data-theme="dark"] .text-\[\#40534f\] {
+  color: var(--foreground) !important;
+}
+
+html[data-theme="dark"] .text-\[\#52645f\],
+html[data-theme="dark"] .text-\[\#687a75\],
+html[data-theme="dark"] .text-\[\#9aa8a4\],
+html[data-theme="dark"] .text-\[\#4f7f76\] {
+  color: var(--muted) !important;
+}
+
+html[data-theme="dark"] .text-\[\#159a86\],
+html[data-theme="dark"] .text-\[\#146c61\] {
+  color: var(--accent) !important;
+}
+
+html[data-theme="dark"] .shadow-sm,
+html[data-theme="dark"] .shadow-md {
+  box-shadow: var(--shadow-soft) !important;
 }

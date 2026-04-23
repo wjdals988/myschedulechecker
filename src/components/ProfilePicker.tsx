@@ -31,26 +31,23 @@ export function ProfilePicker({
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-sm font-semibold text-[#273f3a]">작성자 표시</p>
-        <p className="text-xs text-[#687a75]">닉네임과 작성자 표시는 이 브라우저에 저장됩니다.</p>
+        <p className="app-kicker text-xs font-bold">Profile</p>
+        <p className="mt-2 text-sm font-semibold text-[var(--foreground)]">작성자 표시</p>
+        <p className="mt-1 text-xs leading-6 text-[var(--muted)]">닉네임과 작성자 표시는 브라우저에 저장되어 다음 접속에도 유지됩니다.</p>
       </div>
 
-      <label className="block text-sm font-medium text-[#40534f]">
+      <label className="block text-sm font-semibold text-[var(--foreground)]">
         닉네임
         <div className="mt-2 flex gap-2">
           <input
             value={nickname}
             onChange={(event) => setNickname(event.target.value)}
-            placeholder="예: 민수"
+            placeholder="입력은 선택"
             maxLength={18}
-            className="h-11 min-w-0 flex-1 rounded border border-[#c9d7d2] px-3 outline-none transition focus:border-[#159a86]"
+            className="app-input h-11 min-w-0 flex-1 px-3"
           />
           {currentProfile ? (
-            <button
-              type="button"
-              onClick={saveCurrentNickname}
-              className="h-11 rounded bg-[#14211f] px-3 text-sm font-semibold text-white"
-            >
+            <button type="button" onClick={saveCurrentNickname} className="app-button-primary h-11 px-3 text-sm font-semibold">
               저장
             </button>
           ) : null}
@@ -63,7 +60,7 @@ export function ProfilePicker({
             key={emoji}
             type="button"
             onClick={() => onPick(withNickname({ label: makeMixedLabel(emoji), kind: "mixed" }))}
-            className="grid h-11 min-w-11 place-items-center rounded border border-[#c9d7d2] bg-white text-lg shadow-sm transition hover:border-[#159a86]"
+            className="app-button-secondary grid h-11 min-w-11 place-items-center text-lg font-medium shadow-[var(--shadow-soft)] hover:border-[var(--accent)]"
             title={`${emoji} 표시명 선택`}
           >
             {emoji}
@@ -72,16 +69,16 @@ export function ProfilePicker({
         <button
           type="button"
           onClick={() => onPick(withNickname({ label: randomNumberLabel(), kind: "number" }))}
-          className="h-11 rounded border border-[#c9d7d2] bg-white px-4 text-sm font-semibold text-[#273f3a] shadow-sm transition hover:border-[#159a86]"
+          className="app-button-secondary h-11 px-4 text-sm font-semibold shadow-[var(--shadow-soft)] hover:border-[var(--accent)]"
         >
           숫자
         </button>
       </div>
 
       {currentProfile ? (
-        <div className="rounded border border-[#b8ded4] bg-[#eefaf7] px-3 py-2 text-sm text-[#146c61]">
-          현재 사용자: <span className="font-semibold">{displayName}</span>
-          {currentProfile.nickname ? <span className="text-[#4f7f76]"> · {currentProfile.label}</span> : null}
+        <div className="app-subtle-panel px-3 py-2 text-sm text-[var(--accent)]">
+          현재 사용 중 <span className="font-semibold">{displayName}</span>
+          {currentProfile.nickname ? <span className="text-[var(--muted)]"> · {currentProfile.label}</span> : null}
         </div>
       ) : null}
     </div>
