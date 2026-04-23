@@ -85,13 +85,13 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
                 key={key}
                 onClick={() => setSelectedDate(key)}
                 className={cn(
-                  "aspect-square min-h-0 rounded border bg-white p-1 text-left shadow-sm transition hover:border-[#159a86] sm:aspect-auto sm:min-h-24 sm:p-2",
+                  "aspect-square min-h-0 overflow-hidden rounded border bg-white p-1 text-left shadow-sm transition hover:border-[#159a86] sm:aspect-auto sm:min-h-24 sm:p-2",
                   muted && "bg-[#eef3f1] text-[#9aa8a4]",
                   isToday(day) && "border-[#159a86]",
                   selected && "ring-2 ring-[#159a86]",
                 )}
               >
-                <div className="flex h-full flex-col justify-between sm:block">
+                <div className="flex h-full flex-col justify-between sm:h-auto sm:block">
                   <div className="flex items-start justify-between gap-1">
                     <span
                       className={cn(
@@ -111,7 +111,7 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
                     ) : null}
                   </div>
                 </div>
-                <div className="mt-2 hidden space-y-1 sm:block">
+                <div className="mt-2 hidden max-h-14 space-y-1 overflow-hidden sm:block">
                   {events.slice(0, 2).map((event) => (
                     <div key={event.id} className="rounded bg-[#eefaf7] px-2 py-1 text-xs font-semibold text-[#146c61]">
                       <div className="truncate">{event.title}</div>
