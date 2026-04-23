@@ -47,19 +47,19 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
           <div className="flex gap-1.5">
             <Link
               href={`/rooms/${roomId}/schedule?date=${previousMonthDate}`}
-              className="h-9 rounded-md border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
+              className="h-9 whitespace-nowrap rounded-md border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
             >
               이전달
             </Link>
             <Link
               href={`/rooms/${roomId}/schedule?date=${todayKey()}`}
-              className="h-9 rounded-md border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
+              className="h-9 whitespace-nowrap rounded-md border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
             >
               오늘
             </Link>
             <Link
               href={`/rooms/${roomId}/schedule?date=${nextMonthDate}`}
-              className="h-9 rounded-md border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
+              className="h-9 whitespace-nowrap rounded-md border border-[#c9d7d2] bg-white px-2.5 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
             >
               다음달
             </Link>
@@ -110,22 +110,22 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
       <section className="flex-1 px-4 py-5">
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-4">
-            <div className="flex items-end justify-between gap-3">
+            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-sm font-semibold text-[#159a86]">Schedule</p>
-                <h1 className="text-2xl font-bold">{format(selected, "M월 d일 EEEE", { locale: ko })}</h1>
+                <h1 className="whitespace-nowrap text-2xl font-bold">{format(selected, "M월 d일 EEEE", { locale: ko })}</h1>
               </div>
-              <div className="flex gap-2">
+              <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
                 <button
                   onClick={() => setQuickAddOpen((open) => !open)}
-                  className="inline-flex h-10 items-center gap-2 rounded-md bg-[#14211f] px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#223632]"
+                  className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-[#14211f] px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#223632]"
                 >
                   <PlusIcon className="h-4 w-4" />
                   빠른 추가
                 </button>
                 <Link
                   href={`/rooms/${roomId}/calendar`}
-                  className="inline-flex h-10 items-center gap-2 rounded-md border border-[#c9d7d2] bg-white px-3 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
+                  className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-[#c9d7d2] bg-white px-3 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
                 >
                   <CalendarIcon className="h-4 w-4" />
                   달력
