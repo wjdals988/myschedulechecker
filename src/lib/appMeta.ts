@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.3",
+    releasedAt: "2026-04-25",
+    title: "일정 달력 표시와 날짜별 할일 추가 개선",
+    changes: [
+      "일정 탭 상단 날짜 카드 폭과 간격을 조금 줄여 과하게 넓어 보이지 않게 조정했습니다.",
+      "상단 달력의 공휴일 점을 제거하고, 빨간 날짜와 메모 점의 의미를 범례로 표시했습니다.",
+      "할일 탭의 날짜별 그룹 아래에서 해당 날짜 일정에 바로 할일을 추가할 수 있게 했습니다.",
+    ],
+  },
+  {
     version: "0.5.2",
     releasedAt: "2026-04-25",
     title: "모바일 할일 UX 개선",

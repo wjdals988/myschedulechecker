@@ -13,7 +13,7 @@ import { dateKey, parseDateKey, todayKey } from "@/lib/dates";
 import { getEventColorOption, normalizeEventTag } from "@/lib/eventAppearance";
 import { getDb } from "@/lib/firebase";
 import { profileDisplayName } from "@/lib/profile";
-import type { TodoWithEvent } from "@/lib/types";
+import type { EventItem, TodoWithEvent } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export type TodoRange = "week" | "month";
@@ -53,6 +53,12 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
       todos: groupTodos,
     }));
   }, [visibleTodos]);
+  const eventsByDate = useMemo(() => {
+    return events.reduce<Record<string, EventItem[]>>((acc, event) => {
+      acc[event.date] = [...(acc[event.date] ?? []), event];
+      return acc;
+    }, {});
+  }, [events]);
 
   const doneCount = todos.filter((todo) => todo.done).length;
   const activeCount = todos.length - doneCount;
@@ -254,6 +260,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
                       <TodoListItem key={`${todo.eventId}:${todo.id}:${todo.text}`} roomId={roomId} todo={todo} />
                     ))}
                   </div>
+                  <DateTodoQuickAdd roomId={roomId} date={group.date} events={eventsByDate[group.date] ?? []} author={author} />
                 </section>
               ))}
             </div>
@@ -305,6 +312,98 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
         </div>
       ) : null}
     </main>
+  );
+}
+
+function DateTodoQuickAdd({
+  roomId,
+  date,
+  events,
+  author,
+}: {
+  roomId: string;
+  date: string;
+  events: EventItem[];
+  author: { uid: string; label: string } | null;
+}) {
+  const [text, setText] = useState("");
+  const [targetEventId, setTargetEventId] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const effectiveTargetEventId = events.some((event) => event.id === targetEventId) ? targetEventId : (events[0]?.id ?? "");
+
+  async function addTodo() {
+    const trimmed = text.trim();
+    if (!trimmed || !effectiveTargetEventId || !author) return;
+
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      await addDoc(collection(getDb(), "rooms", roomId, "events", effectiveTargetEventId, "todos"), {
+        text: trimmed,
+        done: false,
+        order: Date.now(),
+        authorUid: author.uid,
+        authorLabel: author.label,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      setText("");
+      setMessage("추가했습니다.");
+      window.setTimeout(() => setMessage(null), 1600);
+    } catch (caught) {
+      setMessage(caught instanceof Error ? caught.message : "할일 추가에 실패했습니다.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="border-t border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <p className="text-xs font-bold text-[var(--muted)]">이 날짜에 할일 추가</p>
+        {events.length > 1 ? (
+          <select
+            value={effectiveTargetEventId}
+            onChange={(event) => setTargetEventId(event.target.value)}
+            className="app-input h-8 max-w-[12rem] px-2 text-xs"
+            aria-label={`${date} 할일을 연결할 일정 선택`}
+          >
+            {events.map((event) => (
+              <option key={event.id} value={event.id}>
+                {event.startTime ? `${event.startTime} ` : ""}
+                {event.title}
+              </option>
+            ))}
+          </select>
+        ) : null}
+      </div>
+
+      <div className="flex gap-2">
+        <input
+          value={text}
+          onChange={(event) => setText(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") addTodo();
+          }}
+          placeholder={events[0] ? `${events[0].title}에 추가` : "이 날짜에 일정이 없습니다."}
+          disabled={events.length === 0}
+          className="app-input h-10 min-w-0 flex-1 px-3 text-sm"
+        />
+        <button
+          type="button"
+          onClick={addTodo}
+          disabled={!text.trim() || !effectiveTargetEventId || !author || saving}
+          className="app-button-primary inline-flex h-10 shrink-0 items-center justify-center gap-1.5 px-3 text-sm font-semibold disabled:opacity-45"
+        >
+          <PlusIcon className="h-4 w-4" />
+          추가
+        </button>
+      </div>
+
+      {message ? <p className="mt-2 text-xs font-semibold text-[var(--muted)]">{message}</p> : null}
+    </div>
   );
 }
 

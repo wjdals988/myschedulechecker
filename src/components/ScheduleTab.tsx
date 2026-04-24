@@ -74,7 +74,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
           </div>
         </div>
 
-        <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-smooth pb-3 touch-pan-x [-webkit-overflow-scrolling:touch] lg:gap-4">
+        <div className="flex snap-x snap-mandatory gap-2.5 overflow-x-auto overscroll-x-contain scroll-smooth pb-3 touch-pan-x [-webkit-overflow-scrolling:touch] lg:gap-3">
           {days.map((day) => {
             const key = format(day, "yyyy-MM-dd");
             const active = key === date;
@@ -93,7 +93,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                   }
                 }}
                 className={cn(
-                  "relative grid h-[5.4rem] w-[5.35rem] flex-none snap-center place-items-center rounded-lg border px-3.5 text-center shadow-[var(--shadow-soft)] transition sm:w-[6.1rem] lg:h-[6.15rem] lg:w-[7.15rem] xl:w-[7.5rem]",
+                  "relative grid h-[5.25rem] w-[5.05rem] flex-none snap-center place-items-center rounded-lg border px-3 text-center shadow-[var(--shadow-soft)] transition sm:w-[5.65rem] lg:h-[5.85rem] lg:w-[6.35rem] xl:w-[6.65rem]",
                   active
                     ? "border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]"
                     : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--accent)]",
@@ -114,18 +114,19 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                     title="메모 있음"
                   />
                 ) : null}
-                {holiday ? (
-                  <span
-                    className={cn(
-                      "absolute left-2 top-2 h-1.5 w-1.5 rounded-full",
-                      active ? "bg-[#ffd1c8]" : "bg-[#d95b43]",
-                    )}
-                    title={holiday.name}
-                  />
-                ) : null}
               </Link>
             );
           })}
+        </div>
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-semibold text-[var(--muted)]">
+          <span className="inline-flex items-center gap-1">
+            <span className="text-[#d95b43]">빨간 날짜</span>
+            공휴일
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#df7a2f]" />
+            메모 있음
+          </span>
         </div>
       </section>
 
