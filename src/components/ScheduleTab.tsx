@@ -303,9 +303,11 @@ function ScheduleMonthPicker({
         <button
           type="button"
           onClick={onPreviousMonth}
-          className="app-button-secondary inline-flex h-9 items-center justify-center px-3 text-xs font-semibold hover:border-[var(--accent)]"
+          className="app-button-secondary inline-flex h-9 w-9 shrink-0 items-center justify-center text-xl font-bold leading-none hover:border-[var(--accent)]"
+          aria-label="이전달"
+          title="이전달"
         >
-          이전
+          ‹
         </button>
         <div className="text-center">
           <p className="text-base font-bold text-[var(--foreground)]">
@@ -318,9 +320,11 @@ function ScheduleMonthPicker({
         <button
           type="button"
           onClick={onNextMonth}
-          className="app-button-secondary inline-flex h-9 items-center justify-center px-3 text-xs font-semibold hover:border-[var(--accent)]"
+          className="app-button-secondary inline-flex h-9 w-9 shrink-0 items-center justify-center text-xl font-bold leading-none hover:border-[var(--accent)]"
+          aria-label="다음달"
+          title="다음달"
         >
-          다음
+          ›
         </button>
       </div>
 

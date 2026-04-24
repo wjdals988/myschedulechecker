@@ -11,6 +11,15 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.7",
+    releasedAt: "2026-04-25",
+    title: "미니 달력 이동 버튼 표시 개선",
+    changes: [
+      "일정 탭 미니 달력의 이전달, 다음달 버튼을 좁은 영역에서도 보이는 화살표 버튼으로 변경했습니다.",
+      "버튼 접근성 라벨과 툴팁은 이전달, 다음달로 유지했습니다.",
+    ],
+  },
+  {
     version: "0.5.6",
     releasedAt: "2026-04-25",
     title: "일정 탭 미니 달력 이동 추가",
