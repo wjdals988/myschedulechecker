@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.0",
+    releasedAt: "2026-04-25",
+    title: "할일 탭과 일정 달력 폭 개선",
+    changes: [
+      "하단 탭에 할일을 추가하고, 이번주/이번달 기준으로 일정에 연결된 할일을 모아 볼 수 있게 했습니다.",
+      "할일 탭에서 체크, 수정, 삭제와 일정 선택 후 빠른 추가를 바로 처리할 수 있게 했습니다.",
+      "일정 탭 상단 가로 달력의 날짜 카드 폭과 높이를 키우고 스크롤 스냅을 적용했습니다.",
+    ],
+  },
+  {
     version: "0.4.1",
     releasedAt: "2026-04-24",
     title: "레이어 표시와 일정 스트립 폭 보정",

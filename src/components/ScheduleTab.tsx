@@ -74,7 +74,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
           </div>
         </div>
 
-        <div className="flex gap-3.5 overflow-x-auto pb-2 lg:gap-4">
+        <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-3 lg:gap-4">
           {days.map((day) => {
             const key = format(day, "yyyy-MM-dd");
             const active = key === date;
@@ -93,7 +93,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                   }
                 }}
                 className={cn(
-                  "relative grid h-[5.2rem] min-w-[4.85rem] place-items-center rounded-lg border px-3 text-center shadow-[var(--shadow-soft)] transition sm:min-w-[5rem] lg:h-[5.5rem] lg:min-w-[5.2rem] xl:h-[5.7rem] xl:min-w-[5.35rem]",
+                  "relative grid h-[5.4rem] min-w-[5rem] snap-center place-items-center rounded-lg border px-3.5 text-center shadow-[var(--shadow-soft)] transition sm:min-w-[5.75rem] lg:h-[6rem] lg:min-w-[6.25rem] xl:min-w-[6.6rem]",
                   active
                     ? "border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]"
                     : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--accent)]",

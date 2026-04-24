@@ -47,3 +47,12 @@ export type TodoItem = {
   createdAt?: unknown;
   updatedAt?: unknown;
 };
+
+export type TodoWithEvent = TodoItem & {
+  eventId: string;
+  eventTitle: string;
+  eventDate: string;
+  eventStartTime?: string;
+  eventTag?: string;
+  eventColor?: string;
+};

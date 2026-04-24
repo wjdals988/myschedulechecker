@@ -14,6 +14,14 @@ export function ListIcon({ className = "h-5 w-5" }: { className?: string }) {
   );
 }
 
+export function CheckListIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path d="m4 7 2 2 4-4M13 7h7M4 17l2 2 4-4M13 17h7" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function PlusIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">

@@ -13,7 +13,7 @@ import { getDb } from "@/lib/firebase";
 import { saveRecentRoom } from "@/lib/recentRooms";
 import type { Room } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, ListIcon, ShareIcon } from "@/components/icons";
+import { CalendarIcon, CheckListIcon, ListIcon, ShareIcon } from "@/components/icons";
 
 export function RoomShell({
   roomId,
@@ -109,9 +109,11 @@ export function RoomShell({
   }
 
   const scheduleHref = `/rooms/${roomId}/schedule?date=${todayKey()}`;
+  const todosHref = `/rooms/${roomId}/todos?date=${todayKey()}&range=week`;
   const isCalendarPage = pathname.endsWith("/calendar");
   const isScheduleListPage = pathname.endsWith("/schedule");
-  const contentWidthClassName = isCalendarPage || isScheduleListPage ? "max-w-[92rem]" : "max-w-5xl";
+  const isTodosPage = pathname.endsWith("/todos");
+  const contentWidthClassName = isCalendarPage || isScheduleListPage || isTodosPage ? "max-w-[92rem]" : "max-w-5xl";
 
   return (
     <div className="min-h-screen bg-[var(--background)] pb-24 text-[var(--foreground)]">
@@ -162,7 +164,7 @@ export function RoomShell({
       <div className={cn("mx-auto", contentWidthClassName)}>{children}</div>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--border)] bg-[var(--surface)] px-4 py-2 backdrop-blur">
-        <div className="mx-auto grid max-w-md grid-cols-2 gap-2">
+        <div className="mx-auto grid max-w-lg grid-cols-3 gap-2">
           <Link
             href={`/rooms/${roomId}/calendar`}
             className={cn(
@@ -186,6 +188,18 @@ export function RoomShell({
           >
             <ListIcon />
             일정
+          </Link>
+          <Link
+            href={todosHref}
+            className={cn(
+              "flex h-12 items-center justify-center gap-2 rounded-md text-sm font-semibold transition",
+              pathname.includes("/todos")
+                ? "border border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]"
+                : "text-[var(--muted)] hover:bg-[var(--surface-muted)]",
+            )}
+          >
+            <CheckListIcon />
+            할일
           </Link>
         </div>
       </nav>
