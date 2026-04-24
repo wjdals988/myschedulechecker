@@ -41,7 +41,7 @@ export function EventAppearanceFields({
                 type="button"
                 onClick={() => onColorChange(option.key)}
                 className={cn(
-                  "inline-flex h-11 items-center justify-center gap-2 rounded-md border px-3 text-sm font-semibold transition hover:-translate-y-0.5",
+                  "inline-flex h-11 items-center justify-center gap-1.5 rounded-md border px-2 text-sm font-semibold whitespace-nowrap transition hover:-translate-y-0.5 sm:gap-2 sm:px-3",
                   active
                     ? option.badgeClass
                     : "border-[#c9d7d2] bg-white text-[#40534f] hover:border-[#159a86]",

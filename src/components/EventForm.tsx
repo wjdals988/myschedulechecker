@@ -108,7 +108,7 @@ export function EventForm({
 
       <button
         disabled={busy || !title.trim()}
-        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded bg-[#159a86] px-4 text-sm font-semibold text-white transition hover:bg-[#108270] disabled:opacity-50"
+        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded bg-[#159a86] px-4 text-sm font-semibold !text-white transition hover:bg-[#108270] disabled:opacity-50"
       >
         <PlusIcon />
         일정 추가

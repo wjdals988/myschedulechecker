@@ -169,7 +169,7 @@ function EventEditor({
             type="button"
             onClick={saveEvent}
             disabled={!hasChanges || saving || deleting}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#14211f] px-3 text-sm font-semibold text-white transition hover:bg-[#243a35] disabled:opacity-45"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#14211f] px-3 text-sm font-semibold !text-white transition hover:bg-[#243a35] disabled:opacity-45"
           >
             <EditIcon className="h-4 w-4" />
             {saving ? "저장 중" : "저장"}

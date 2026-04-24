@@ -223,8 +223,18 @@ export function MonthlyCalendar({ roomId }: { roomId: string }) {
       </div>
 
       {selectedDate ? (
-        <div className="fixed inset-0 z-40 flex items-end bg-black/45 p-0 sm:block sm:p-4">
-          <div className="mx-auto max-h-[86vh] w-full max-w-lg overflow-y-auto rounded-t-lg bg-white p-4 shadow-xl sm:mt-10 sm:rounded-lg sm:p-5">
+        <div
+          className="fixed inset-0 z-40 flex items-end bg-black/45 p-0 sm:block sm:p-4"
+          onClick={closeDateModal}
+          role="presentation"
+        >
+          <div
+            className="mx-auto max-h-[86vh] w-full max-w-lg overflow-y-auto rounded-t-lg bg-white p-4 shadow-xl sm:mt-10 sm:rounded-lg sm:p-5"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${selectedDate} 일정`}
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-[#159a86]">{format(parseDateKey(selectedDate), "yyyy.MM.dd")}</p>

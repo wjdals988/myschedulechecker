@@ -74,7 +74,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
           </div>
         </div>
 
-        <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-3 lg:gap-4">
+        <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-smooth pb-3 touch-pan-x [-webkit-overflow-scrolling:touch] lg:gap-4">
           {days.map((day) => {
             const key = format(day, "yyyy-MM-dd");
             const active = key === date;
@@ -93,7 +93,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                   }
                 }}
                 className={cn(
-                  "relative grid h-[5.4rem] min-w-[5rem] snap-center place-items-center rounded-lg border px-3.5 text-center shadow-[var(--shadow-soft)] transition sm:min-w-[5.75rem] lg:h-[6rem] lg:min-w-[6.25rem] xl:min-w-[6.6rem]",
+                  "relative grid h-[5.4rem] w-[5.35rem] flex-none snap-center place-items-center rounded-lg border px-3.5 text-center shadow-[var(--shadow-soft)] transition sm:w-[6.1rem] lg:h-[6.15rem] lg:w-[7.15rem] xl:w-[7.5rem]",
                   active
                     ? "border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]"
                     : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--accent)]",
@@ -142,7 +142,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
               <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
                 <button
                   onClick={() => setQuickAddOpen((open) => !open)}
-                  className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-[#14211f] px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#223632]"
+                  className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-[#14211f] px-3 py-2 text-sm font-semibold !text-white shadow-sm transition hover:bg-[#223632]"
                 >
                   <PlusIcon className="h-4 w-4" />
                   빠른 추가
