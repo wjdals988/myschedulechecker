@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.8",
+    releasedAt: "2026-04-25",
+    title: "할일 탭 필터와 날짜 탐색 정리",
+    changes: [
+      "할일 탭 상단을 이번주, 이번달 선택과 이전/오늘/다음 날짜 탐색 중심으로 재배치했습니다.",
+      "이전/다음 탐색은 < 오늘 > 형태의 compact 컨트롤로 변경했습니다.",
+      "미완료만 보기 토글을 전체, 미완료, 완료 통계 아래로 옮겼습니다.",
+    ],
+  },
+  {
     version: "0.5.7",
     releasedAt: "2026-04-25",
     title: "미니 달력 이동 버튼 표시 개선",

@@ -172,12 +172,12 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex rounded-md border border-[var(--border-strong)] bg-[var(--surface)] p-0.5">
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <div className="grid grid-cols-2 rounded-md border border-[var(--border-strong)] bg-[var(--surface)] p-0.5">
             <Link
               href={`/rooms/${roomId}/todos?date=${date}&range=week`}
               className={cn(
-                "inline-flex h-9 items-center rounded px-3 text-sm font-semibold",
+                "inline-flex h-9 items-center justify-center rounded px-3 text-sm font-semibold",
                 range === "week" ? "border border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]" : "text-[var(--muted)]",
               )}
             >
@@ -186,7 +186,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
             <Link
               href={`/rooms/${roomId}/todos?date=${date}&range=month`}
               className={cn(
-                "inline-flex h-9 items-center rounded px-3 text-sm font-semibold",
+                "inline-flex h-9 items-center justify-center rounded px-3 text-sm font-semibold",
                 range === "month" ? "border border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]" : "text-[var(--muted)]",
               )}
             >
@@ -194,26 +194,15 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
             </Link>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setIncompleteOnly((value) => !value)}
-            className={cn(
-              "app-button-secondary inline-flex h-10 items-center justify-center whitespace-nowrap px-3 text-sm font-semibold hover:border-[var(--accent)]",
-              incompleteOnly && "border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]",
-            )}
-          >
-            미완료만
-          </button>
-
-          <div className="grid grid-cols-3 gap-2">
-            <Link href={`/rooms/${roomId}/todos?date=${previousDate}&range=${range}`} className="app-button-secondary inline-flex h-10 items-center justify-center whitespace-nowrap px-3 text-sm font-semibold hover:border-[var(--accent)]">
-              이전
+          <div className="grid grid-cols-[2.75rem_minmax(4.75rem,1fr)_2.75rem] overflow-hidden rounded-md border border-[var(--border-strong)] bg-[var(--surface)]">
+            <Link href={`/rooms/${roomId}/todos?date=${previousDate}&range=${range}`} className="inline-flex h-10 items-center justify-center text-base font-bold text-[var(--foreground)] hover:bg-[var(--surface-muted)]" aria-label="이전 기간">
+              {"<"}
             </Link>
-            <Link href={`/rooms/${roomId}/todos?date=${todayKey()}&range=${range}`} className="app-button-secondary inline-flex h-10 items-center justify-center whitespace-nowrap px-3 text-sm font-semibold hover:border-[var(--accent)]">
+            <Link href={`/rooms/${roomId}/todos?date=${todayKey()}&range=${range}`} className="inline-flex h-10 items-center justify-center border-x border-[var(--border)] px-3 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--surface-muted)]">
               오늘
             </Link>
-            <Link href={`/rooms/${roomId}/todos?date=${nextDate}&range=${range}`} className="app-button-secondary inline-flex h-10 items-center justify-center whitespace-nowrap px-3 text-sm font-semibold hover:border-[var(--accent)]">
-              다음
+            <Link href={`/rooms/${roomId}/todos?date=${nextDate}&range=${range}`} className="inline-flex h-10 items-center justify-center text-base font-bold text-[var(--foreground)] hover:bg-[var(--surface-muted)]" aria-label="다음 기간">
+              {">"}
             </Link>
           </div>
         </div>
@@ -226,6 +215,20 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
             <TodoStat label="미완료" value={activeCount} />
             <TodoStat label="완료" value={doneCount} />
           </div>
+
+          <button
+            type="button"
+            onClick={() => setIncompleteOnly((value) => !value)}
+            className={cn(
+              "app-button-secondary inline-flex h-10 items-center justify-center gap-2 px-3 text-sm font-semibold hover:border-[var(--accent)]",
+              incompleteOnly && "border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]",
+            )}
+          >
+            <span className="grid h-4 w-4 place-items-center rounded-sm border border-current text-[10px] leading-none">
+              {incompleteOnly ? "✓" : ""}
+            </span>
+            미완료만 보기
+          </button>
 
           {(eventsError || todosError) && (
             <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">
