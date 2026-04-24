@@ -1,6 +1,6 @@
 "use client";
 
-import { addDays, addMonths, format, startOfMonth, subMonths } from "date-fns";
+import { addDays, addMonths, format, startOfMonth, startOfWeek, subMonths } from "date-fns";
 import { ko } from "date-fns/locale";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,21 +12,29 @@ import { useEventsByDate } from "@/hooks/useEventsByDate";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
 import { dateKey, isCurrentMonth, parseDateKey, todayKey } from "@/lib/dates";
 import { getKoreanHoliday, getKoreanHolidayMapForDates } from "@/lib/koreanHolidays";
+import type { EventItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) {
   const router = useRouter();
   const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [monthPickerOpen, setMonthPickerOpen] = useState(false);
+  const [pickerMonth, setPickerMonth] = useState(() => startOfMonth(parseDateKey(date)));
   const selected = parseDateKey(date);
   const selectedMonth = startOfMonth(selected);
-  const previousMonthDate = dateKey(subMonths(selectedMonth, 1));
-  const nextMonthDate = dateKey(addMonths(selectedMonth, 1));
   const days = Array.from({ length: 42 }, (_, index) => addDays(selectedMonth, index));
+  const pickerDays = Array.from(
+    { length: 42 },
+    (_, index) => addDays(startOfWeek(pickerMonth, { weekStartsOn: 0 }), index),
+  );
   const dayRefs = useRef(new Map<string, HTMLAnchorElement>());
   const { events: selectedDateEvents, loading: selectedDateLoading, error } = useEventsByDate(roomId, date);
   const rangeStart = dateKey(days[0] ?? selected);
   const rangeEnd = dateKey(days[days.length - 1] ?? selected);
-  const { events: rangeEvents, byDate, loading: monthLoading } = useEventsInRange(roomId, rangeStart, rangeEnd);
+  const { events: rangeEvents, byDate: stripByDate, loading: monthLoading } = useEventsInRange(roomId, rangeStart, rangeEnd);
+  const pickerRangeStart = dateKey(pickerDays[0] ?? pickerMonth);
+  const pickerRangeEnd = dateKey(pickerDays[pickerDays.length - 1] ?? pickerMonth);
+  const { byDate: pickerByDate, loading: pickerLoading } = useEventsInRange(roomId, pickerRangeStart, pickerRangeEnd);
   const monthEvents = rangeEvents.filter((event) => isCurrentMonth(parseDateKey(event.date), selectedMonth));
   const holidayMap = getKoreanHolidayMapForDates(
     Array.from({ length: 42 }, (_, index) => format(addDays(selectedMonth, index), "yyyy-MM-dd")),
@@ -41,6 +49,19 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
     });
   }, [date]);
 
+  useEffect(() => {
+    if (!monthPickerOpen) return;
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMonthPickerOpen(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [monthPickerOpen]);
+
   return (
     <main className="flex min-h-[calc(100vh-148px)] flex-col">
       <section className="sticky top-[72px] z-10 border-b border-[var(--border)] bg-[var(--background)] px-4 py-4 backdrop-blur lg:px-6 lg:py-5">
@@ -52,25 +73,48 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
             </h2>
           </div>
 
-          <div className="flex gap-2">
-            <Link
-              href={`/rooms/${roomId}/schedule?date=${previousMonthDate}`}
-              className="app-button-secondary inline-flex h-10 items-center justify-center whitespace-nowrap px-3 text-sm font-semibold shadow-[var(--shadow-soft)] hover:border-[var(--accent)]"
+          <div className="relative">
+            {monthPickerOpen ? (
+              <button
+                type="button"
+                className="fixed inset-0 z-10 cursor-default"
+                aria-label="날짜 선택 닫기"
+                onClick={() => setMonthPickerOpen(false)}
+              />
+            ) : null}
+            <button
+              type="button"
+              onClick={() => {
+                setPickerMonth(selectedMonth);
+                setMonthPickerOpen((open) => !open);
+              }}
+              className="app-button-secondary relative z-20 inline-flex h-10 w-10 items-center justify-center shadow-[var(--shadow-soft)] hover:border-[var(--accent)]"
+              title="날짜 선택"
+              aria-haspopup="dialog"
+              aria-expanded={monthPickerOpen}
             >
-              이전달
-            </Link>
-            <Link
-              href={`/rooms/${roomId}/schedule?date=${todayKey()}`}
-              className="app-button-secondary inline-flex h-10 items-center justify-center whitespace-nowrap px-3 text-sm font-semibold shadow-[var(--shadow-soft)] hover:border-[var(--accent)]"
-            >
-              오늘
-            </Link>
-            <Link
-              href={`/rooms/${roomId}/schedule?date=${nextMonthDate}`}
-              className="app-button-secondary inline-flex h-10 items-center justify-center whitespace-nowrap px-3 text-sm font-semibold shadow-[var(--shadow-soft)] hover:border-[var(--accent)]"
-            >
-              다음달
-            </Link>
+              <CalendarIcon className="h-4 w-4" />
+            </button>
+
+            {monthPickerOpen ? (
+              <ScheduleMonthPicker
+                pickerMonth={pickerMonth}
+                selectedDate={date}
+                days={pickerDays}
+                byDate={pickerByDate}
+                loading={pickerLoading}
+                onPreviousMonth={() => setPickerMonth((month) => subMonths(month, 1))}
+                onNextMonth={() => setPickerMonth((month) => addMonths(month, 1))}
+                onToday={() => {
+                  setMonthPickerOpen(false);
+                  router.push(`/rooms/${roomId}/schedule?date=${todayKey()}`);
+                }}
+                onSelectDate={(nextDate) => {
+                  setMonthPickerOpen(false);
+                  router.push(`/rooms/${roomId}/schedule?date=${nextDate}`);
+                }}
+              />
+            ) : null}
           </div>
         </div>
 
@@ -78,7 +122,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
           {days.map((day) => {
             const key = format(day, "yyyy-MM-dd");
             const active = key === date;
-            const hasMemo = (byDate[key] ?? []).some((event) => event.memo);
+            const hasMemo = (stripByDate[key] ?? []).some((event) => event.memo);
             const holiday = holidayMap[key];
 
             return (
@@ -222,5 +266,122 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
         </div>
       </section>
     </main>
+  );
+}
+
+function ScheduleMonthPicker({
+  pickerMonth,
+  selectedDate,
+  days,
+  byDate,
+  loading,
+  onPreviousMonth,
+  onNextMonth,
+  onToday,
+  onSelectDate,
+}: {
+  pickerMonth: Date;
+  selectedDate: string;
+  days: Date[];
+  byDate: Record<string, EventItem[]>;
+  loading: boolean;
+  onPreviousMonth: () => void;
+  onNextMonth: () => void;
+  onToday: () => void;
+  onSelectDate: (date: string) => void;
+}) {
+  const today = todayKey();
+  const weekdayLabels = ["일", "월", "화", "수", "목", "금", "토"];
+
+  return (
+    <div
+      className="absolute right-0 top-12 z-20 w-[calc(100vw-2rem)] max-w-[21rem] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-soft)]"
+      role="dialog"
+      aria-label="작은 달력"
+    >
+      <div className="flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={onPreviousMonth}
+          className="app-button-secondary inline-flex h-9 items-center justify-center px-3 text-xs font-semibold hover:border-[var(--accent)]"
+        >
+          이전
+        </button>
+        <div className="text-center">
+          <p className="text-base font-bold text-[var(--foreground)]">
+            {format(pickerMonth, "yyyy년 M월", { locale: ko })}
+          </p>
+          <p className="mt-0.5 text-[11px] font-semibold text-[var(--muted)]">
+            일정 있는 날은 빨간 점으로 표시됩니다.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onNextMonth}
+          className="app-button-secondary inline-flex h-9 items-center justify-center px-3 text-xs font-semibold hover:border-[var(--accent)]"
+        >
+          다음
+        </button>
+      </div>
+
+      <button
+        type="button"
+        onClick={onToday}
+        className="app-button-primary mt-3 inline-flex h-9 w-full items-center justify-center text-xs font-semibold"
+      >
+        오늘 날짜로 이동
+      </button>
+
+      <div className="mt-4 grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-[var(--muted)]">
+        {weekdayLabels.map((label) => (
+          <span key={label} className={cn(label === "일" && "text-[#d95b43]")}>
+            {label}
+          </span>
+        ))}
+      </div>
+
+      <div className="mt-2 grid grid-cols-7 gap-1">
+        {days.map((day) => {
+          const key = dateKey(day);
+          const active = key === selectedDate;
+          const isToday = key === today;
+          const outside = !isCurrentMonth(day, pickerMonth);
+          const hasEvents = (byDate[key]?.length ?? 0) > 0;
+
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onSelectDate(key)}
+              className={cn(
+                "relative flex aspect-square items-center justify-center rounded-md border text-sm font-bold transition",
+                active
+                  ? "border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]"
+                  : "border-transparent text-[var(--foreground)] hover:border-[var(--accent)] hover:bg-[var(--surface-muted)]",
+                outside && !active && "text-[var(--muted)] opacity-45",
+                isToday && !active && "border-[var(--accent)]",
+              )}
+              aria-label={format(day, "M월 d일 EEEE", { locale: ko })}
+            >
+              {format(day, "d")}
+              {hasEvents ? (
+                <span
+                  className="absolute bottom-1 h-1.5 w-1.5 rounded-full bg-[#d95b43]"
+                  title="일정 있음"
+                />
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-3 flex items-center justify-between text-[11px] font-semibold text-[var(--muted)]">
+        <span className="inline-flex items-center gap-1">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#d95b43]" />
+          일정 있음
+        </span>
+        {loading ? <span>일정 표시 확인 중</span> : null}
+      </div>
+    </div>
   );
 }

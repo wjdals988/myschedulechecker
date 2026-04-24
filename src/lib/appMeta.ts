@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.6",
+    releasedAt: "2026-04-25",
+    title: "일정 탭 미니 달력 이동 추가",
+    changes: [
+      "일정 탭 상단의 이전달, 오늘, 다음달 버튼을 달력 아이콘 버튼으로 정리했습니다.",
+      "달력 아이콘을 누르면 작은 월간 달력 팝업이 열리고, 일정이 있는 날짜는 빨간 점으로 표시됩니다.",
+      "미니 달력 안에서 이전달, 다음달, 오늘 날짜 이동을 처리할 수 있게 했습니다.",
+    ],
+  },
+  {
     version: "0.5.5",
     releasedAt: "2026-04-25",
     title: "일정 상단 달력 크기 조정",
