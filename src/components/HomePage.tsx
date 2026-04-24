@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { ClockIcon } from "@/components/icons";
 import { ProfilePicker } from "@/components/ProfilePicker";
+import { ReleaseNotesButton } from "@/components/ReleaseNotesButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { getDb } from "@/lib/firebase";
@@ -148,7 +149,7 @@ export function HomePage() {
           <div className="space-y-3">
             <p className="app-kicker text-xs font-bold">Shared Schedule</p>
             <h1 className="max-w-3xl text-[2rem] font-bold tracking-normal text-[var(--foreground)] sm:text-[2.35rem]">
-              다시 찾지 않아도 바로 들어가는 공유 일정 홈
+              공유 일정 관리 메인 페이지
             </h1>
             <p className="max-w-2xl text-sm leading-7 text-[var(--muted)] sm:text-base">
               익명 로그인으로 바로 시작하고, 자주 들어가는 방은 홈에 남겨 두세요. 초대 코드와 최근 방문 기록만으로 빠르게 다시 이어집니다.
@@ -156,6 +157,7 @@ export function HomePage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <ReleaseNotesButton />
             <ThemeToggle compact />
             {session.profile ? (
               <div className="app-panel inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-[var(--foreground)]">
@@ -246,7 +248,7 @@ export function HomePage() {
                   {recentRooms.map((room) => (
                     <Link
                       key={room.roomId}
-                      href={`/join/${room.inviteCode}`}
+                      href={`/rooms/${room.roomId}/calendar`}
                       className="block rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 transition hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-[var(--surface)]"
                     >
                       <div className="flex items-start justify-between gap-3">

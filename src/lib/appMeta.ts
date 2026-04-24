@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.4",
+    releasedAt: "2026-04-25",
+    title: "홈 화면 진입성과 버전 정보 개선",
+    changes: [
+      "메인 페이지 제목을 공유 일정 관리 메인 페이지로 변경했습니다.",
+      "홈 화면에서도 버전 배지를 눌러 업데이트 내역을 볼 수 있게 했습니다.",
+      "최근 들어간 방을 선택하면 초대 재참가 화면이 아니라 해당 방 달력으로 바로 이동하게 했습니다.",
+    ],
+  },
+  {
     version: "0.5.3",
     releasedAt: "2026-04-25",
     title: "일정 달력 표시와 날짜별 할일 추가 개선",
