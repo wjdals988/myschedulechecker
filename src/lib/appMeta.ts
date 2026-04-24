@@ -11,6 +11,15 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.5",
+    releasedAt: "2026-04-25",
+    title: "일정 상단 달력 크기 조정",
+    changes: [
+      "일정 탭 상단 가로 달력의 날짜 카드 폭과 높이를 줄여 한 화면에서 더 많은 날짜가 보이도록 조정했습니다.",
+      "날짜 카드의 요일과 숫자 크기를 함께 낮춰 카드 안 여백이 과하게 커 보이지 않게 정리했습니다.",
+    ],
+  },
+  {
     version: "0.5.4",
     releasedAt: "2026-04-25",
     title: "홈 화면 진입성과 버전 정보 개선",

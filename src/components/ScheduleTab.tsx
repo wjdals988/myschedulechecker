@@ -74,7 +74,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
           </div>
         </div>
 
-        <div className="flex snap-x snap-mandatory gap-2.5 overflow-x-auto overscroll-x-contain scroll-smooth pb-3 touch-pan-x [-webkit-overflow-scrolling:touch] lg:gap-3">
+        <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain scroll-smooth pb-3 touch-pan-x [-webkit-overflow-scrolling:touch] lg:gap-2.5">
           {days.map((day) => {
             const key = format(day, "yyyy-MM-dd");
             const active = key === date;
@@ -93,16 +93,16 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                   }
                 }}
                 className={cn(
-                  "relative grid h-[5.25rem] w-[5.05rem] flex-none snap-center place-items-center rounded-lg border px-3 text-center shadow-[var(--shadow-soft)] transition sm:w-[5.65rem] lg:h-[5.85rem] lg:w-[6.35rem] xl:w-[6.65rem]",
+                  "relative grid h-[4.65rem] w-[4.35rem] flex-none snap-center place-items-center rounded-lg border px-2.5 text-center shadow-[var(--shadow-soft)] transition sm:w-[4.85rem] lg:h-[5rem] lg:w-[5.25rem] xl:w-[5.5rem]",
                   active
                     ? "border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]"
                     : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--accent)]",
                 )}
               >
-                <span className={cn("text-[0.74rem] font-semibold", holiday && !active && "text-[#d95b43]")}>
+                <span className={cn("text-[0.7rem] font-semibold", holiday && !active && "text-[#d95b43]")}>
                   {format(day, "EEE", { locale: ko })}
                 </span>
-                <span className={cn("text-[1.55rem] font-bold leading-none lg:text-[1.7rem]", holiday && !active && "text-[#d95b43]")}>
+                <span className={cn("text-[1.35rem] font-bold leading-none lg:text-[1.48rem]", holiday && !active && "text-[#d95b43]")}>
                   {format(day, "d")}
                 </span>
                 {hasMemo ? (
