@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.2",
+    releasedAt: "2026-04-25",
+    title: "모바일 할일 UX 개선",
+    changes: [
+      "모바일 할일 탭의 전체, 미완료, 완료 요약을 한 줄로 배치했습니다.",
+      "모바일 빠른 추가를 우상단 + 버튼으로 열리는 바텀시트로 옮겼습니다.",
+      "PC에서는 기존처럼 오른쪽 빠른 추가 패널을 유지했습니다.",
+    ],
+  },
+  {
     version: "0.5.1",
     releasedAt: "2026-04-25",
     title: "일정 조작 편의성과 스크롤 UI 보정",

@@ -31,6 +31,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
   const { events, loading: eventsLoading, error: eventsError } = useEventsInRange(roomId, rangeStart, rangeEnd);
   const { todos, loading: todosLoading, error: todosError } = useTodosForEvents(roomId, events);
   const [incompleteOnly, setIncompleteOnly] = useState(true);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [targetEventId, setTargetEventId] = useState("");
   const [text, setText] = useState("");
   const [saving, setSaving] = useState(false);
@@ -82,6 +83,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
       });
       setText("");
       setMessage("할일을 추가했습니다.");
+      setQuickAddOpen(false);
       window.setTimeout(() => setMessage(null), 1800);
     } catch (caught) {
       setMessage(caught instanceof Error ? caught.message : "할일 추가에 실패했습니다.");
@@ -90,13 +92,78 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
     }
   }
 
+  const quickAddPanel = (
+    <div className="space-y-3">
+      <label className="block text-sm font-semibold text-[var(--muted)]">
+        연결할 일정
+        <select
+          value={effectiveTargetEventId}
+          onChange={(event) => setTargetEventId(event.target.value)}
+          disabled={events.length === 0}
+          className="app-input mt-2 h-11 w-full px-3 text-sm"
+        >
+          {events.length === 0 ? <option value="">기간 내 일정 없음</option> : null}
+          {events.map((event) => (
+            <option key={event.id} value={event.id}>
+              {event.date} {event.startTime ? `${event.startTime} ` : ""}
+              {event.title}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="block text-sm font-semibold text-[var(--muted)]">
+        할일
+        <textarea
+          value={text}
+          onChange={(event) => setText(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) addTodo();
+          }}
+          rows={3}
+          placeholder="해야 할 일을 입력하세요."
+          className="app-input mt-2 min-h-24 w-full resize-none px-3 py-2 text-sm"
+        />
+      </label>
+
+      <button
+        type="button"
+        onClick={addTodo}
+        disabled={!text.trim() || !effectiveTargetEventId || !author || saving}
+        className="app-button-primary inline-flex h-11 w-full items-center justify-center gap-2 px-4 text-sm font-semibold disabled:opacity-45"
+      >
+        <PlusIcon className="h-4 w-4" />
+        {saving ? "추가 중" : "할일 추가"}
+      </button>
+
+      {message ? <p className="rounded-md border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm font-semibold text-[var(--muted)]">{message}</p> : null}
+
+      {events.length === 0 ? (
+        <Link href={`/rooms/${roomId}/schedule?date=${date}`} className="app-button-secondary inline-flex h-10 w-full items-center justify-center px-3 text-sm font-semibold hover:border-[var(--accent)]">
+          일정 먼저 만들기
+        </Link>
+      ) : null}
+    </div>
+  );
+
   return (
     <main className="min-h-[calc(100vh-148px)] px-4 py-5 lg:px-6 lg:py-6">
       <section className="mb-5 flex flex-col gap-4 border-b border-[var(--border)] pb-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="app-kicker text-[0.72rem] font-bold">To-do</p>
-          <h1 className="mt-1 text-2xl font-bold text-[var(--foreground)]">{range === "week" ? "이번주 할일" : "이번달 할일"}</h1>
-          <p className="mt-2 text-sm font-semibold text-[var(--muted)]">{title}</p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="app-kicker text-[0.72rem] font-bold">To-do</p>
+            <h1 className="mt-1 text-2xl font-bold text-[var(--foreground)]">{range === "week" ? "이번주 할일" : "이번달 할일"}</h1>
+            <p className="mt-2 text-sm font-semibold text-[var(--muted)]">{title}</p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setQuickAddOpen(true)}
+            className="app-button-primary grid h-11 w-11 shrink-0 place-items-center xl:hidden"
+            aria-label="할일 빠른 추가"
+          >
+            <PlusIcon className="h-5 w-5" />
+          </button>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -148,7 +215,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <TodoStat label="전체" value={todos.length} />
             <TodoStat label="미완료" value={activeCount} />
             <TodoStat label="완료" value={doneCount} />
@@ -166,7 +233,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
             <div className="app-panel p-5 text-center">
               <p className="font-bold text-[var(--foreground)]">{incompleteOnly && todos.length > 0 ? "미완료 할일이 없습니다." : "표시할 할일이 없습니다."}</p>
               <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                할일은 일정에 연결됩니다. 빠른 추가 영역에서 일정 하나를 선택해 추가할 수 있습니다.
+                할일은 일정에 연결됩니다. 모바일에서는 우상단 + 버튼으로 빠르게 추가할 수 있습니다.
               </p>
             </div>
           ) : (
@@ -193,7 +260,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
           )}
         </div>
 
-        <aside className="xl:sticky xl:top-24 xl:self-start">
+        <aside className="hidden xl:sticky xl:top-24 xl:block xl:self-start">
           <section className="app-panel p-4">
             <div className="mb-4">
               <p className="app-kicker text-[0.7rem] font-bold">Quick Add</p>
@@ -201,69 +268,51 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
               <p className="mt-1 text-xs leading-5 text-[var(--muted)]">선택한 기간의 일정 중 하나에 할일을 연결합니다.</p>
             </div>
 
-            <div className="space-y-3">
-              <label className="block text-sm font-semibold text-[var(--muted)]">
-                연결할 일정
-                <select
-                  value={effectiveTargetEventId}
-                  onChange={(event) => setTargetEventId(event.target.value)}
-                  disabled={events.length === 0}
-                  className="app-input mt-2 h-11 w-full px-3 text-sm"
-                >
-                  {events.length === 0 ? <option value="">기간 내 일정 없음</option> : null}
-                  {events.map((event) => (
-                    <option key={event.id} value={event.id}>
-                      {event.date} {event.startTime ? `${event.startTime} ` : ""}
-                      {event.title}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="block text-sm font-semibold text-[var(--muted)]">
-                할일
-                <textarea
-                  value={text}
-                  onChange={(event) => setText(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) addTodo();
-                  }}
-                  rows={3}
-                  placeholder="해야 할 일을 입력하세요."
-                  className="app-input mt-2 min-h-24 w-full resize-none px-3 py-2 text-sm"
-                />
-              </label>
-
-              <button
-                type="button"
-                onClick={addTodo}
-                disabled={!text.trim() || !effectiveTargetEventId || !author || saving}
-                className="app-button-primary inline-flex h-11 w-full items-center justify-center gap-2 px-4 text-sm font-semibold disabled:opacity-45"
-              >
-                <PlusIcon className="h-4 w-4" />
-                {saving ? "추가 중" : "할일 추가"}
-              </button>
-
-              {message ? <p className="rounded-md border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm font-semibold text-[var(--muted)]">{message}</p> : null}
-
-              {events.length === 0 ? (
-                <Link href={`/rooms/${roomId}/schedule?date=${date}`} className="app-button-secondary inline-flex h-10 w-full items-center justify-center px-3 text-sm font-semibold hover:border-[var(--accent)]">
-                  일정 먼저 만들기
-                </Link>
-              ) : null}
-            </div>
+            {quickAddPanel}
           </section>
         </aside>
       </section>
+
+      {quickAddOpen ? (
+        <div
+          className="fixed inset-0 z-40 flex items-end bg-black/45 xl:hidden"
+          onClick={() => setQuickAddOpen(false)}
+          role="presentation"
+        >
+          <section
+            className="max-h-[82dvh] w-full overflow-y-auto rounded-t-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="할일 빠른 추가"
+          >
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <p className="app-kicker text-[0.7rem] font-bold">Quick Add</p>
+                <h2 className="mt-1 text-lg font-bold text-[var(--foreground)]">일정에 할일 추가</h2>
+                <p className="mt-1 text-xs leading-5 text-[var(--muted)]">선택한 기간의 일정 중 하나에 할일을 연결합니다.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setQuickAddOpen(false)}
+                className="app-button-secondary h-9 shrink-0 px-3 text-sm font-semibold"
+              >
+                닫기
+              </button>
+            </div>
+            {quickAddPanel}
+          </section>
+        </div>
+      ) : null}
     </main>
   );
 }
 
 function TodoStat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="app-subtle-panel p-4">
+    <div className="app-subtle-panel p-3 text-center sm:p-4 sm:text-left">
       <p className="text-xs font-bold text-[var(--muted)]">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-[var(--foreground)]">{value}</p>
+      <p className="mt-1 text-xl font-bold text-[var(--foreground)] sm:text-2xl">{value}</p>
     </div>
   );
 }
