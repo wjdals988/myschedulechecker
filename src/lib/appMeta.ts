@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.17",
+    releasedAt: "2026-04-26",
+    title: "나눔바른고딕 폰트와 할일 이동 링크 적용",
+    changes: [
+      "앱 기본 폰트를 MaruBuri에서 NanumBarunGothicLight로 교체했습니다.",
+      "기존 MaruBuri 폰트 파일을 제거하고 새 폰트 파일만 배포 번들에 포함되도록 정리했습니다.",
+      "일정 탭의 선택일 Todo 제목을 누르면 할일 탭의 해당 할일 위치로 바로 이동하도록 연결했습니다.",
+    ],
+  },
+  {
     version: "0.5.16",
     releasedAt: "2026-04-26",
     title: "버튼 크기와 종일 일정 표기 정리",

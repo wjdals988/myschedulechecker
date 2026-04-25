@@ -424,13 +424,15 @@ function SelectedDateEventList({
                           aria-label={`${todo.text} 완료 상태 변경`}
                         />
                         <span className="min-w-0 flex-1">
-                          <LinkifiedText
-                            text={todo.text}
+                          <Link
+                            href={`/rooms/${roomId}/todos?date=${todo.eventDate}&range=week#todo-${todo.eventId}-${todo.id}`}
                             className={cn(
-                              "block text-sm leading-5 text-[var(--foreground)]",
+                              "block text-sm font-semibold leading-5 text-[var(--foreground)] underline decoration-transparent underline-offset-4 hover:text-[var(--accent)] hover:decoration-current",
                               todo.done && "line-through opacity-60",
                             )}
-                          />
+                          >
+                            {todo.text}
+                          </Link>
                           <span className="mt-1 block text-[11px] font-semibold text-[var(--muted)]">
                             작성 {todo.authorLabel}
                           </span>

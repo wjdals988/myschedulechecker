@@ -4,7 +4,7 @@ import { addDoc, collection, doc, serverTimestamp, updateDoc } from "firebase/fi
 import { addMonths, addWeeks, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek, subMonths, subWeeks } from "date-fns";
 import { ko } from "date-fns/locale";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EditIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import { LinkifiedText } from "@/components/LinkifiedText";
 import { ShareTargetButton } from "@/components/ShareTargetButton";
@@ -58,6 +58,19 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
       todos: groupTodos,
     }));
   }, [visibleTodos]);
+
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+
+    const target = document.getElementById(decodeURIComponent(hash));
+    if (!target) return;
+
+    window.requestAnimationFrame(() => {
+      target.scrollIntoView({ block: "center" });
+    });
+  }, [groupedTodos]);
+
   const eventsByDate = useMemo(() => {
     return events.reduce<Record<string, EventItem[]>>((acc, event) => {
       acc[event.date] = [...(acc[event.date] ?? []), event];
@@ -491,7 +504,7 @@ function TodoListItem({
   }
 
   return (
-    <article className="px-4 py-3">
+    <article id={`todo-${todo.eventId}-${todo.id}`} className="todo-list-item px-4 py-3">
       <div className="grid gap-3 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-start">
         <input
           type="checkbox"

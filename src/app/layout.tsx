@@ -3,9 +3,9 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { themeInitScript } from "@/lib/theme";
 
-const maruBuri = localFont({
-  src: "./fonts/MaruBuri-Regular.ttf",
-  variable: "--font-maruburi",
+const nanumBarunGothic = localFont({
+  src: "./fonts/NanumBarunGothicLight.otf",
+  variable: "--font-nanum-barun-gothic",
   display: "swap",
   fallback: ["system-ui", "sans-serif"],
 });
@@ -53,7 +53,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" suppressHydrationWarning className={maruBuri.variable}>
+    <html lang="ko" suppressHydrationWarning className={nanumBarunGothic.variable}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript() }} />
       </head>

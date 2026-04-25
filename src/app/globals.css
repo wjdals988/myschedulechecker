@@ -57,7 +57,7 @@ body {
   min-height: 100%;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-maruburi), system-ui, sans-serif;
+  font-family: var(--font-nanum-barun-gothic), system-ui, sans-serif;
   font-size: 1rem;
   line-height: 1.55;
   letter-spacing: 0;
@@ -205,6 +205,16 @@ select {
   color: var(--accent);
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.todo-list-item {
+  scroll-margin-top: 8rem;
+}
+
+.todo-list-item:target {
+  background: var(--selection-surface);
+  outline: 1px solid var(--selection-border);
+  outline-offset: -1px;
 }
 
 html[data-theme="dark"] .bg-\[\#f8faf9\] {
