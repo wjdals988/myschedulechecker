@@ -11,6 +11,15 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.10",
+    releasedAt: "2026-04-26",
+    title: "선택일 To-do 노출 개선",
+    changes: [
+      "일정 탭의 선택일 일정 목록에서 각 일정에 연결된 To-do 리스트를 함께 보여줍니다.",
+      "일정 탭에서 달력으로 돌아갈 때 선택 날짜가 속한 월은 유지하되 날짜 팝업은 자동으로 열지 않게 했습니다.",
+    ],
+  },
+  {
     version: "0.5.9",
     releasedAt: "2026-04-25",
     title: "일정 탭 선택일 목록과 달력 이동 개선",

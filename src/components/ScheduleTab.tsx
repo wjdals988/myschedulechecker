@@ -4,15 +4,17 @@ import { addDays, addMonths, format, startOfMonth, startOfWeek, subMonths } from
 import { ko } from "date-fns/locale";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AgendaListPanel } from "@/components/AgendaListPanel";
 import { EventForm } from "@/components/EventForm";
 import { CalendarIcon, PlusIcon } from "@/components/icons";
 import { useEventsByDate } from "@/hooks/useEventsByDate";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
+import { useTodosForEvents } from "@/hooks/useTodosForEvents";
 import { dateKey, isCurrentMonth, parseDateKey, todayKey } from "@/lib/dates";
+import { getEventColorOption, normalizeEventTag } from "@/lib/eventAppearance";
 import { getKoreanHoliday, getKoreanHolidayMapForDates } from "@/lib/koreanHolidays";
-import type { EventItem } from "@/lib/types";
+import type { EventItem, TodoWithEvent } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) {
@@ -29,6 +31,17 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
   );
   const dayRefs = useRef(new Map<string, HTMLAnchorElement>());
   const { events: selectedDateEvents, loading: selectedDateLoading, error } = useEventsByDate(roomId, date);
+  const {
+    todos: selectedDateTodos,
+    loading: selectedDateTodosLoading,
+    error: selectedDateTodosError,
+  } = useTodosForEvents(roomId, selectedDateEvents);
+  const selectedTodosByEvent = useMemo(() => {
+    return selectedDateTodos.reduce<Record<string, TodoWithEvent[]>>((acc, todo) => {
+      acc[todo.eventId] = [...(acc[todo.eventId] ?? []), todo];
+      return acc;
+    }, {});
+  }, [selectedDateTodos]);
   const rangeStart = dateKey(days[0] ?? selected);
   const rangeEnd = dateKey(days[days.length - 1] ?? selected);
   const { events: rangeEvents, byDate: stripByDate, loading: monthLoading } = useEventsInRange(roomId, rangeStart, rangeEnd);
@@ -235,14 +248,14 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
             ) : null}
 
             {!selectedDateLoading && selectedDateEvents.length > 0 ? (
-              <section className="rounded-md border border-[#d8e3df] bg-white p-4 shadow-sm">
-                <AgendaListPanel
-                  roomId={roomId}
-                  title="선택일 일정"
-                  events={selectedDateEvents}
-                  showTodoProgress
-                />
-              </section>
+              <SelectedDateEventList
+                roomId={roomId}
+                date={date}
+                events={selectedDateEvents}
+                todosByEvent={selectedTodosByEvent}
+                todosLoading={selectedDateTodosLoading}
+                todosError={selectedDateTodosError}
+              />
             ) : null}
 
             <AgendaListPanel
@@ -277,6 +290,126 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
         </div>
       </section>
     </main>
+  );
+}
+
+function SelectedDateEventList({
+  roomId,
+  date,
+  events,
+  todosByEvent,
+  todosLoading,
+  todosError,
+}: {
+  roomId: string;
+  date: string;
+  events: EventItem[];
+  todosByEvent: Record<string, TodoWithEvent[]>;
+  todosLoading: boolean;
+  todosError: string | null;
+}) {
+  return (
+    <section className="rounded-md border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-soft)]">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-base font-bold text-[var(--foreground)]">선택일 일정</h2>
+          <p className="mt-1 text-xs font-semibold text-[var(--muted)]">{events.length}개</p>
+        </div>
+        {todosLoading ? <span className="text-xs font-semibold text-[var(--muted)]">To-do 불러오는 중</span> : null}
+      </div>
+
+      {todosError ? (
+        <p className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+          {todosError}
+        </p>
+      ) : null}
+
+      <div className="mt-3 space-y-3">
+        {events.map((event) => {
+          const tone = getEventColorOption(event.color);
+          const tag = normalizeEventTag(event.tag);
+          const todos = todosByEvent[event.id] ?? [];
+          const doneCount = todos.filter((todo) => todo.done).length;
+
+          return (
+            <article
+              key={event.id}
+              className={cn(
+                "rounded-md border border-[var(--border)] border-l-4 bg-[var(--surface)] p-3 shadow-sm",
+                tone.accentClass,
+              )}
+            >
+              <Link href={`/rooms/${roomId}/schedule/${event.id}?date=${date}`} className="block">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {tag ? (
+                        <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-bold", tone.badgeClass)}>
+                          {tag}
+                        </span>
+                      ) : null}
+                      <h3 className="truncate font-semibold text-[var(--foreground)]">{event.title}</h3>
+                    </div>
+                    <p className="mt-1 text-xs font-semibold text-[var(--muted)]">
+                      {event.startTime ?? "시간 없음"} {event.endTime ? `- ${event.endTime}` : ""}
+                    </p>
+                  </div>
+                  <span className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", tone.dotClass)} />
+                </div>
+                {event.memo ? <p className="mt-2 line-clamp-2 text-sm leading-5 text-[var(--muted)]">{event.memo}</p> : null}
+              </Link>
+
+              <div className="mt-3 border-t border-[var(--border)] pt-3">
+                <div className="mb-2 flex items-center justify-between gap-2 text-[11px] font-semibold text-[var(--muted)]">
+                  <span>To-do 리스트</span>
+                  {todos.length > 0 ? (
+                    <span>
+                      {doneCount}/{todos.length} 완료
+                    </span>
+                  ) : null}
+                </div>
+
+                {todos.length > 0 ? (
+                  <ul className="space-y-1.5">
+                    {todos.map((todo) => (
+                      <li key={todo.id} className="flex items-start gap-2 rounded-md bg-[var(--surface-muted)] px-2.5 py-2">
+                        <span
+                          className={cn(
+                            "mt-0.5 inline-grid h-4 w-4 shrink-0 place-items-center rounded border text-[10px] font-bold",
+                            todo.done
+                              ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                              : "border-[var(--border)] bg-[var(--surface)]",
+                          )}
+                          aria-hidden="true"
+                        >
+                          {todo.done ? "✓" : ""}
+                        </span>
+                        <span
+                          className={cn(
+                            "min-w-0 flex-1 break-words text-sm leading-5 text-[var(--foreground)]",
+                            todo.done && "line-through opacity-60",
+                          )}
+                        >
+                          {todo.text}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : todosLoading ? (
+                  <p className="rounded-md bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--muted)]">
+                    To-do를 불러오는 중입니다.
+                  </p>
+                ) : (
+                  <p className="rounded-md bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--muted)]">
+                    연결된 할일이 없습니다.
+                  </p>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
