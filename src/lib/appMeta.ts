@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.18",
+    releasedAt: "2026-04-26",
+    title: "할일 추가 대상 표시와 버튼 텍스트 기준 정리",
+    changes: [
+      "할일 탭의 날짜별 할일 추가 입력란이 실제 선택한 일정명을 placeholder에 표시하도록 수정했습니다.",
+      "공통 버튼 텍스트 크기를 14px 기준으로 맞춰 공유, 수정, 상세, 추가 버튼의 글자 크기 차이를 줄였습니다.",
+      "프로필 표시 아이콘처럼 텍스트가 아니라 시각 요소로 쓰는 버튼은 별도 예외 클래스로 유지했습니다.",
+    ],
+  },
+  {
     version: "0.5.17",
     releasedAt: "2026-04-26",
     title: "나눔바른고딕 폰트와 할일 이동 링크 적용",

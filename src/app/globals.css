@@ -175,6 +175,7 @@ select {
   border-radius: 8px;
   background: var(--foreground);
   color: var(--background);
+  font-size: 0.875rem;
 }
 
 .app-button-secondary {
@@ -182,6 +183,7 @@ select {
   border: 1px solid var(--border-strong);
   background: var(--surface);
   color: var(--foreground);
+  font-size: 0.875rem;
 }
 
 :where(.app-button-primary, .app-button-secondary) {
@@ -199,6 +201,10 @@ select {
   width: 1rem;
   height: 1rem;
   flex: 0 0 1rem;
+}
+
+.app-button-emoji {
+  font-size: 1.125rem;
 }
 
 .app-kicker {

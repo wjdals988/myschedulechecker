@@ -45,7 +45,6 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const effectiveTargetEventId = events.some((event) => event.id === targetEventId) ? targetEventId : (events[0]?.id ?? "");
-
   const visibleTodos = useMemo(() => (incompleteOnly ? todos.filter((todo) => !todo.done) : todos), [incompleteOnly, todos]);
   const groupedTodos = useMemo(() => {
     const groups = visibleTodos.reduce<Record<string, TodoWithEvent[]>>((acc, todo) => {
@@ -336,6 +335,7 @@ function DateTodoQuickAdd({
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const effectiveTargetEventId = events.some((event) => event.id === targetEventId) ? targetEventId : (events[0]?.id ?? "");
+  const selectedEvent = events.find((event) => event.id === effectiveTargetEventId);
 
   async function addTodo() {
     const trimmed = text.trim();
@@ -386,7 +386,7 @@ function DateTodoQuickAdd({
           onKeyDown={(event) => {
             if (event.key === "Enter") addTodo();
           }}
-          placeholder={events[0] ? `${events[0].title}에 추가` : "이 날짜에 일정이 없습니다."}
+          placeholder={selectedEvent ? `${selectedEvent.title}에 추가` : "이 날짜에 일정이 없습니다."}
           disabled={events.length === 0}
           className="app-input h-10 min-w-0 flex-1 px-3 text-sm"
         />

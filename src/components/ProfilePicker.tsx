@@ -60,7 +60,7 @@ export function ProfilePicker({
             key={emoji}
             type="button"
             onClick={() => onPick(withNickname({ label: makeMixedLabel(emoji), kind: "mixed" }))}
-            className="app-button-secondary grid h-11 min-w-11 place-items-center text-lg font-medium shadow-[var(--shadow-soft)] hover:border-[var(--accent)]"
+            className="app-button-secondary app-button-emoji grid h-11 min-w-11 place-items-center font-medium shadow-[var(--shadow-soft)] hover:border-[var(--accent)]"
             title={`${emoji} 표시명 선택`}
           >
             {emoji}
