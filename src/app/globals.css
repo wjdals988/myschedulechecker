@@ -184,6 +184,23 @@ select {
   color: var(--foreground);
 }
 
+:where(.app-button-primary, .app-button-secondary) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  line-height: 1.15;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.app-button-primary > svg,
+.app-button-secondary > svg {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 1rem;
+}
+
 .app-kicker {
   color: var(--accent);
   letter-spacing: 0.12em;

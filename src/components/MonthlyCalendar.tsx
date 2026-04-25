@@ -281,7 +281,7 @@ export function MonthlyCalendar({ roomId, initialDate }: { roomId: string; initi
                           </div>
                           <div className="mt-2 font-semibold">{event.title}</div>
                           <div className="mt-1 text-sm opacity-80">
-                            {event.startTime ?? "시간 없음"} {event.endTime ? `- ${event.endTime}` : ""}
+                            {event.startTime ?? "종일"} {event.endTime ? `- ${event.endTime}` : ""}
                           </div>
                           {event.location ? <div className="mt-1 truncate text-sm opacity-80">장소 {event.location}</div> : null}
                           <div className="mt-1 text-[11px] font-semibold opacity-70">작성 {event.authorLabel}</div>
@@ -306,7 +306,7 @@ export function MonthlyCalendar({ roomId, initialDate }: { roomId: string; initi
 
             <div className="mt-6 border-t border-[#d8e3df] pt-5">
               <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[#273f3a]">
-                <PlusIcon />
+                <PlusIcon className="h-4 w-4" />
                 일정 추가
               </div>
               <EventForm roomId={roomId} date={selectedDate} />

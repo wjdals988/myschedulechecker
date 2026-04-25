@@ -120,7 +120,7 @@ export function EventForm({
         disabled={busy || !title.trim()}
         className="inline-flex h-11 w-full items-center justify-center gap-2 rounded bg-[#159a86] px-4 text-sm font-semibold !text-white transition hover:bg-[#108270] disabled:opacity-50"
       >
-        <PlusIcon />
+        <PlusIcon className="h-4 w-4" />
         일정 추가
       </button>
     </form>

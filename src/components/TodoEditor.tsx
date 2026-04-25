@@ -89,7 +89,7 @@ export function TodoEditor({
           className="app-button-primary grid h-16 w-14 place-items-center disabled:opacity-50"
           title="할일 추가"
         >
-          <PlusIcon />
+          <PlusIcon className="h-4 w-4" />
         </button>
       </div>
 

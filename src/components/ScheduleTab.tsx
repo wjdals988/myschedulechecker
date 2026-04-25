@@ -387,7 +387,7 @@ function SelectedDateEventList({
                       <h3 className="truncate font-semibold text-[var(--foreground)]">{event.title}</h3>
                     </div>
                     <p className="mt-1 text-xs font-semibold text-[var(--muted)]">
-                      {event.startTime ?? "시간 없음"} {event.endTime ? `- ${event.endTime}` : ""}
+                      {event.startTime ?? "종일"} {event.endTime ? `- ${event.endTime}` : ""}
                     </p>
                     {event.location ? <p className="mt-1 truncate text-xs font-semibold text-[var(--muted)]">장소 {event.location}</p> : null}
                     <p className="mt-1 text-[11px] font-semibold text-[var(--muted)]">작성 {event.authorLabel}</p>

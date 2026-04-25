@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.16",
+    releasedAt: "2026-04-26",
+    title: "버튼 크기와 종일 일정 표기 정리",
+    changes: [
+      "공통 버튼의 정렬, 줄높이, 아이콘 크기 기준을 맞춰 화면마다 버튼 내부 요소가 흔들리지 않게 했습니다.",
+      "일정 추가, 할일 추가처럼 버튼 안에 들어가는 주요 아이콘 크기를 16px 기준으로 통일했습니다.",
+      "시작 시간이 없는 일정 표기를 '시간 없음'에서 더 자연스러운 '종일'로 변경했습니다.",
+    ],
+  },
+  {
     version: "0.5.15",
     releasedAt: "2026-04-26",
     title: "일정 장소와 선택일 Todo 추가 개선",

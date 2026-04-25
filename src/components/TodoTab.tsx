@@ -167,7 +167,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
             className="app-button-primary grid h-11 w-11 shrink-0 place-items-center xl:hidden"
             aria-label="할일 빠른 추가"
           >
-            <PlusIcon className="h-5 w-5" />
+            <PlusIcon className="h-4 w-4" />
           </button>
         </div>
 
@@ -435,7 +435,7 @@ function EventChoiceList({
             role="radio"
             aria-checked={selected}
           >
-            <span className="shrink-0 text-[var(--accent)]">{event.startTime ?? "시간 없음"}</span>
+            <span className="shrink-0 text-[var(--accent)]">{event.startTime ?? "종일"}</span>
             <span className="min-w-0 flex-1 truncate">
               {showDate ? `${event.date} ` : ""}
               {event.title}
@@ -553,7 +553,7 @@ function TodoListItem({
             <Link href={`/rooms/${roomId}/schedule/${todo.eventId}?date=${todo.eventDate}`} className="truncate text-[var(--accent)] hover:underline">
               {todo.eventTitle}
             </Link>
-            <span>{todo.eventStartTime ?? "시간 없음"}</span>
+            <span>{todo.eventStartTime ?? "종일"}</span>
             {todo.eventLocation ? <span className="truncate">장소 {todo.eventLocation}</span> : null}
             <span>작성 {todo.authorLabel}</span>
           </div>
