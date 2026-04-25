@@ -11,6 +11,14 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.20",
+    releasedAt: "2026-04-26",
+    title: "할일 의견 가독성 개선",
+    changes: [
+      "할일 하위 의견의 작성자와 본문 표시 크기를 한 단계 키워 더 읽기 쉽게 조정했습니다.",
+    ],
+  },
+  {
     version: "0.5.19",
     releasedAt: "2026-04-26",
     title: "할일 탭 빠른 추가 버튼 제거와 의견 표시 정리",

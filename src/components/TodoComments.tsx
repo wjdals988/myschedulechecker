@@ -91,7 +91,7 @@ export function TodoComments({
           {comments.map((comment) => (
             <div key={comment.id} className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2">
               <div className="flex items-start justify-between gap-2">
-                <p className="min-w-0 text-xs leading-5 text-[var(--foreground)]">
+                <p className="min-w-0 text-sm leading-6 text-[var(--foreground)]">
                   <span className="font-bold text-[var(--accent)]">{comment.authorLabel}</span>
                   <span className="mx-1 text-[var(--muted)]">·</span>
                   <LinkifiedText text={comment.text} />
