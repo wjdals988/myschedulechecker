@@ -50,6 +50,10 @@ service cloud.firestore {
         match /todos/{todoId} {
           allow read, create, update, delete: if isMember(roomId);
         }
+
+        match /comments/{commentId} {
+          allow read, create, update, delete: if isMember(roomId);
+        }
       }
     }
   }

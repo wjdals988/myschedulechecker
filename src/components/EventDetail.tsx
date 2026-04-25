@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { EventAppearanceFields } from "@/components/EventAppearanceFields";
+import { EventComments } from "@/components/EventComments";
 import { TodoEditor } from "@/components/TodoEditor";
 import { EditIcon, TrashIcon } from "@/components/icons";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
@@ -269,7 +270,7 @@ function EventEditor({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-bold text-red-700">일정 삭제</p>
-              <p className="mt-1 text-xs leading-5 text-red-600">삭제하면 이 일정과 연결된 To-do도 함께 삭제됩니다.</p>
+              <p className="mt-1 text-xs leading-5 text-red-600">삭제하면 이 일정과 연결된 To-do와 의견도 함께 삭제됩니다.</p>
             </div>
             {deleteConfirmOpen ? (
               <div className="grid grid-cols-2 gap-2 sm:flex">
@@ -312,6 +313,18 @@ function EventEditor({
         </div>
         {author ? (
           <TodoEditor roomId={roomId} eventId={eventId} author={author} />
+        ) : (
+          <p className="text-sm text-[#687a75]">작성자 정보를 준비하는 중입니다.</p>
+        )}
+      </section>
+
+      <section className="rounded-lg border border-[#d8e3df] bg-white p-4 shadow-sm">
+        <div className="mb-4">
+          <p className="text-sm font-semibold text-[#159a86]">Comments</p>
+          <h2 className="text-xl font-bold">의견</h2>
+        </div>
+        {author ? (
+          <EventComments roomId={roomId} eventId={eventId} author={author} />
         ) : (
           <p className="text-sm text-[#687a75]">작성자 정보를 준비하는 중입니다.</p>
         )}

@@ -2,17 +2,19 @@
 
 import { addDays, addMonths, format, startOfMonth, startOfWeek, subMonths } from "date-fns";
 import { ko } from "date-fns/locale";
+import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AgendaListPanel } from "@/components/AgendaListPanel";
 import { EventForm } from "@/components/EventForm";
-import { CalendarIcon, PlusIcon } from "@/components/icons";
+import { CalendarIcon, CheckListIcon, PlusIcon } from "@/components/icons";
 import { useEventsByDate } from "@/hooks/useEventsByDate";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
 import { useTodosForEvents } from "@/hooks/useTodosForEvents";
 import { dateKey, isCurrentMonth, parseDateKey, todayKey } from "@/lib/dates";
 import { getEventColorOption, normalizeEventTag } from "@/lib/eventAppearance";
+import { getDb } from "@/lib/firebase";
 import { getKoreanHoliday, getKoreanHolidayMapForDates } from "@/lib/koreanHolidays";
 import type { EventItem, TodoWithEvent } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -337,7 +339,16 @@ function SelectedDateEventList({
           <h2 className="text-base font-bold text-[var(--foreground)]">선택일 일정</h2>
           <p className="mt-1 text-xs font-semibold text-[var(--muted)]">{events.length}개</p>
         </div>
-        {todosLoading ? <span className="text-xs font-semibold text-[var(--muted)]">To-do 불러오는 중</span> : null}
+        <div className="flex flex-col items-end gap-2">
+          <Link
+            href={`/rooms/${roomId}/todos?date=${date}&range=week`}
+            className="app-button-secondary inline-flex h-8 items-center justify-center gap-1.5 px-2.5 text-xs font-semibold hover:border-[var(--accent)]"
+          >
+            <CheckListIcon className="h-4 w-4" />
+            할일 탭
+          </Link>
+          {todosLoading ? <span className="text-xs font-semibold text-[var(--muted)]">To-do 불러오는 중</span> : null}
+        </div>
       </div>
 
       {todosError ? (
@@ -395,17 +406,18 @@ function SelectedDateEventList({
                   <ul className="space-y-1.5">
                     {todos.map((todo) => (
                       <li key={todo.id} className="flex items-start gap-2 rounded-md bg-[var(--surface-muted)] px-2.5 py-2">
-                        <span
-                          className={cn(
-                            "mt-0.5 inline-grid h-4 w-4 shrink-0 place-items-center rounded border text-[10px] font-bold",
-                            todo.done
-                              ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-                              : "border-[var(--border)] bg-[var(--surface)]",
-                          )}
-                          aria-hidden="true"
-                        >
-                          {todo.done ? "✓" : ""}
-                        </span>
+                        <input
+                          type="checkbox"
+                          checked={todo.done}
+                          onChange={(change) =>
+                            updateDoc(doc(getDb(), "rooms", roomId, "events", todo.eventId, "todos", todo.id), {
+                              done: change.target.checked,
+                              updatedAt: serverTimestamp(),
+                            })
+                          }
+                          className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--accent)]"
+                          aria-label={`${todo.text} 완료 상태 변경`}
+                        />
                         <span
                           className={cn(
                             "min-w-0 flex-1 break-words text-sm leading-5 text-[var(--foreground)]",

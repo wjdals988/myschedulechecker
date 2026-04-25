@@ -134,7 +134,18 @@ export function PersonalMenu({
 
         <div className="border-b border-[var(--border)] pb-4">
           <p className="app-kicker text-xs font-bold">Profile</p>
-          <h2 className="mt-2 truncate text-lg font-bold text-[var(--foreground)]">{displayName}</h2>
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <h2 className="min-w-0 truncate text-lg font-bold text-[var(--foreground)]">{displayName}</h2>
+            <button
+              type="button"
+              onClick={copyCalendarShortcutLink}
+              className="app-button-secondary inline-flex h-8 shrink-0 items-center justify-center gap-1.5 px-2 text-[11px] font-semibold hover:border-[var(--accent)]"
+              title="이 방 달력 바로가기 복사"
+            >
+              <CalendarIcon className="h-3.5 w-3.5" />
+              {shortcutStatus === "copied" ? "복사됨" : "바로가기"}
+            </button>
+          </div>
           <p className="mt-2 text-xs font-semibold text-[var(--muted)]">
             {profile.label} · 초대 코드 <span className="tracking-[0.14em] text-[var(--accent)]">{room.inviteCode}</span>
           </p>

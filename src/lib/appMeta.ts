@@ -11,6 +11,17 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.12",
+    releasedAt: "2026-04-26",
+    title: "할일 체크와 의견 기능 추가",
+    changes: [
+      "일정 탭의 선택일 일정에서 To-do를 바로 체크할 수 있고, 할일 탭으로 이동하는 바로가기를 추가했습니다.",
+      "방 제목을 누르면 해당 방의 달력 탭으로 이동하게 했습니다.",
+      "일정 상세의 To-do 아래에 의견 영역을 추가해 방 멤버들이 댓글처럼 내용을 남길 수 있게 했습니다.",
+      "프로필 메뉴 상단의 닉네임 오른쪽에 이 방 달력 바로가기 복사 버튼을 배치했습니다.",
+    ],
+  },
+  {
     version: "0.5.11",
     releasedAt: "2026-04-26",
     title: "일정 표시 점과 달력 바로가기 개선",

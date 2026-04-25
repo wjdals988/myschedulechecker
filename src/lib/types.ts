@@ -56,3 +56,12 @@ export type TodoWithEvent = TodoItem & {
   eventTag?: string;
   eventColor?: string;
 };
+
+export type CommentItem = {
+  id: string;
+  text: string;
+  authorUid: string;
+  authorLabel: string;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+};
