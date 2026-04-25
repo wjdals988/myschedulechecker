@@ -193,7 +193,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                   빠른 추가
                 </button>
                 <Link
-                  href={`/rooms/${roomId}/calendar`}
+                  href={`/rooms/${roomId}/calendar?date=${date}`}
                   className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-[#c9d7d2] bg-white px-3 py-2 text-sm font-semibold shadow-sm transition hover:border-[#159a86]"
                 >
                   <CalendarIcon className="h-4 w-4" />
@@ -231,6 +231,17 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                   </button>
                 </div>
                 <EventForm roomId={roomId} date={date} onCreated={() => setQuickAddOpen(false)} />
+              </section>
+            ) : null}
+
+            {!selectedDateLoading && selectedDateEvents.length > 0 ? (
+              <section className="rounded-md border border-[#d8e3df] bg-white p-4 shadow-sm">
+                <AgendaListPanel
+                  roomId={roomId}
+                  title="선택일 일정"
+                  events={selectedDateEvents}
+                  showTodoProgress
+                />
               </section>
             ) : null}
 

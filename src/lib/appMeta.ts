@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.9",
+    releasedAt: "2026-04-25",
+    title: "일정 탭 선택일 목록과 달력 이동 개선",
+    changes: [
+      "일정 탭에서 선택한 날짜에 일정이 있으면 선택일 일정 리스트를 바로 아래에 노출합니다.",
+      "일정 탭의 달력 버튼을 누르면 현재 선택 날짜를 유지한 채 달력 탭으로 이동합니다.",
+      "달력 탭은 전달받은 날짜가 속한 월과 해당 날짜 상태로 시작합니다.",
+    ],
+  },
+  {
     version: "0.5.8",
     releasedAt: "2026-04-25",
     title: "할일 탭 필터와 날짜 탐색 정리",

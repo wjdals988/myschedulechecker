@@ -13,10 +13,10 @@ import { deleteEventWithTodos } from "@/lib/eventMutations";
 import { getKoreanHoliday, getKoreanHolidayMapForDates } from "@/lib/koreanHolidays";
 import { cn } from "@/lib/utils";
 
-export function MonthlyCalendar({ roomId }: { roomId: string }) {
+export function MonthlyCalendar({ roomId, initialDate }: { roomId: string; initialDate?: string }) {
   const router = useRouter();
-  const [month, setMonth] = useState(() => new Date());
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [month, setMonth] = useState(() => (initialDate ? parseDateKey(initialDate) : new Date()));
+  const [selectedDate, setSelectedDate] = useState<string | null>(initialDate ?? null);
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
   const [eventActionMessage, setEventActionMessage] = useState<string | null>(null);
   const days = useMemo(() => getMonthGrid(month), [month]);
