@@ -554,6 +554,7 @@ function TodoListItem({
               {todo.eventTitle}
             </Link>
             <span>{todo.eventStartTime ?? "시간 없음"}</span>
+            {todo.eventLocation ? <span className="truncate">장소 {todo.eventLocation}</span> : null}
             <span>작성 {todo.authorLabel}</span>
           </div>
         </div>

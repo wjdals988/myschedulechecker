@@ -283,6 +283,7 @@ export function MonthlyCalendar({ roomId, initialDate }: { roomId: string; initi
                           <div className="mt-1 text-sm opacity-80">
                             {event.startTime ?? "시간 없음"} {event.endTime ? `- ${event.endTime}` : ""}
                           </div>
+                          {event.location ? <div className="mt-1 truncate text-sm opacity-80">장소 {event.location}</div> : null}
                           <div className="mt-1 text-[11px] font-semibold opacity-70">작성 {event.authorLabel}</div>
                         </button>
 

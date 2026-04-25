@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.15",
+    releasedAt: "2026-04-26",
+    title: "일정 장소와 선택일 Todo 추가 개선",
+    changes: [
+      "일정 생성과 수정 화면에 장소 입력 필드를 추가했습니다.",
+      "일정 목록, 달력 팝업, 할일 목록에서 입력된 장소를 함께 확인할 수 있게 했습니다.",
+      "일정 탭의 선택일 일정 카드에서 바로 해당 일정의 Todo를 추가할 수 있게 했습니다.",
+    ],
+  },
+  {
     version: "0.5.14",
     releasedAt: "2026-04-26",
     title: "상세 공유와 Todo 의견 개선",

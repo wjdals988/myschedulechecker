@@ -28,6 +28,7 @@ export type EventItem = {
   date: string;
   startTime?: string;
   endTime?: string;
+  location?: string;
   memo?: string;
   tag?: string;
   color?: string;
@@ -53,6 +54,7 @@ export type TodoWithEvent = TodoItem & {
   eventTitle: string;
   eventDate: string;
   eventStartTime?: string;
+  eventLocation?: string;
   eventTag?: string;
   eventColor?: string;
 };

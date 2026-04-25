@@ -182,6 +182,7 @@ function AgendaEventLink({
           <div className="mt-1 text-xs font-semibold text-[#687a75]">
             {event.startTime ?? "시간 없음"} {event.endTime ? `- ${event.endTime}` : ""}
           </div>
+          {event.location ? <div className="mt-1 truncate text-xs font-semibold text-[#687a75]">장소 {event.location}</div> : null}
           <div className="mt-1 text-[11px] font-semibold text-[#687a75]">작성 {event.authorLabel}</div>
         </div>
         <div className="mt-1 flex items-center gap-2">

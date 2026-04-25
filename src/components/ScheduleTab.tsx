@@ -2,7 +2,7 @@
 
 import { addDays, addMonths, format, startOfMonth, startOfWeek, subMonths } from "date-fns";
 import { ko } from "date-fns/locale";
-import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -10,6 +10,7 @@ import { AgendaListPanel } from "@/components/AgendaListPanel";
 import { EventForm } from "@/components/EventForm";
 import { CalendarIcon, CheckListIcon, PlusIcon } from "@/components/icons";
 import { LinkifiedText } from "@/components/LinkifiedText";
+import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { useEventsByDate } from "@/hooks/useEventsByDate";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
 import { useTodosForEvents } from "@/hooks/useTodosForEvents";
@@ -17,6 +18,7 @@ import { dateKey, isCurrentMonth, parseDateKey, todayKey } from "@/lib/dates";
 import { getEventColorOption, normalizeEventTag } from "@/lib/eventAppearance";
 import { getDb } from "@/lib/firebase";
 import { getKoreanHoliday, getKoreanHolidayMapForDates } from "@/lib/koreanHolidays";
+import { profileDisplayName } from "@/lib/profile";
 import type { EventItem, TodoWithEvent } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -387,6 +389,7 @@ function SelectedDateEventList({
                     <p className="mt-1 text-xs font-semibold text-[var(--muted)]">
                       {event.startTime ?? "시간 없음"} {event.endTime ? `- ${event.endTime}` : ""}
                     </p>
+                    {event.location ? <p className="mt-1 truncate text-xs font-semibold text-[var(--muted)]">장소 {event.location}</p> : null}
                     <p className="mt-1 text-[11px] font-semibold text-[var(--muted)]">작성 {event.authorLabel}</p>
                   </div>
                   <span className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", tone.dotClass)} />
@@ -444,12 +447,78 @@ function SelectedDateEventList({
                     연결된 할일이 없습니다.
                   </p>
                 )}
+                <InlineTodoAdd roomId={roomId} eventId={event.id} />
               </div>
             </article>
           );
         })}
       </div>
     </section>
+  );
+}
+
+function InlineTodoAdd({ roomId, eventId }: { roomId: string; eventId: string }) {
+  const session = useAnonymousSession();
+  const [text, setText] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const author =
+    session.uid && session.profile
+      ? {
+          uid: session.uid,
+          label: profileDisplayName(session.profile),
+        }
+      : null;
+
+  async function addTodo() {
+    const trimmed = text.trim();
+    if (!trimmed || !author || saving) return;
+
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      await addDoc(collection(getDb(), "rooms", roomId, "events", eventId, "todos"), {
+        text: trimmed,
+        done: false,
+        order: Date.now(),
+        authorUid: author.uid,
+        authorLabel: author.label,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      setText("");
+      setMessage("할일을 추가했습니다.");
+      window.setTimeout(() => setMessage(null), 1600);
+    } catch (caught) {
+      setMessage(caught instanceof Error ? caught.message : "할일 추가에 실패했습니다.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="mt-3 flex flex-col gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-muted)] p-2 sm:flex-row">
+      <input
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") addTodo();
+        }}
+        placeholder="이 일정에 할일 추가"
+        className="app-input h-9 min-w-0 flex-1 px-3 text-sm"
+      />
+      <button
+        type="button"
+        onClick={addTodo}
+        disabled={!text.trim() || !author || saving}
+        className="app-button-primary inline-flex h-9 shrink-0 items-center justify-center gap-1.5 px-3 text-xs font-semibold disabled:opacity-45"
+      >
+        <PlusIcon className="h-4 w-4" />
+        {saving ? "추가 중" : "할일 추가"}
+      </button>
+      {message ? <p className="text-xs font-semibold text-[var(--muted)] sm:self-center">{message}</p> : null}
+    </div>
   );
 }
 

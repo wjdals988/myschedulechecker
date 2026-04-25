@@ -57,6 +57,7 @@ export function useTodosForEvents(roomId: string, events: EventItem[]) {
           eventTitle: event.title,
           eventDate: event.date,
           eventStartTime: event.startTime,
+          eventLocation: event.location,
           eventTag: event.tag,
           eventColor: event.color,
         }));

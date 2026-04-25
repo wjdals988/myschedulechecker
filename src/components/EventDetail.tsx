@@ -23,6 +23,7 @@ type EventDraft = {
   date: string;
   startTime: string;
   endTime: string;
+  location: string;
   memo: string;
   tag: string;
   color: EventColorKey;
@@ -86,6 +87,7 @@ function EventEditor({
       draft.date !== event.date ||
       normalizedOptional(draft.startTime) !== normalizedOptional(event.startTime) ||
       normalizedOptional(draft.endTime) !== normalizedOptional(event.endTime) ||
+      normalizedOptional(draft.location) !== normalizedOptional(event.location) ||
       normalizedOptional(draft.memo) !== normalizedOptional(event.memo) ||
       normalizeEventTag(draft.tag) !== normalizeEventTag(event.tag) ||
       normalizeEventColor(draft.color) !== normalizeEventColor(event.color)
@@ -125,6 +127,7 @@ function EventEditor({
         date: draft.date,
         startTime: draft.startTime || null,
         endTime: draft.endTime || null,
+        location: draft.location.trim() || null,
         memo: draft.memo.trim() || null,
         tag: normalizeEventTag(draft.tag) || null,
         color: normalizeEventColor(draft.color),
@@ -251,6 +254,16 @@ function EventEditor({
             </label>
           </div>
 
+          <label className="block text-sm font-semibold text-[var(--muted)]">
+            장소
+            <input
+              value={draft.location}
+              onChange={(change) => updateDraft("location", change.target.value)}
+              className="app-input mt-2 h-11 w-full px-3"
+              placeholder="장소를 입력하세요."
+            />
+          </label>
+
           <EventAppearanceFields
             tag={draft.tag}
             color={draft.color}
@@ -343,6 +356,7 @@ function toDraft(event: EventItem): EventDraft {
     date: event.date,
     startTime: event.startTime ?? "",
     endTime: event.endTime ?? "",
+    location: event.location ?? "",
     memo: event.memo ?? "",
     tag: normalizeEventTag(event.tag),
     color: normalizeEventColor(event.color),

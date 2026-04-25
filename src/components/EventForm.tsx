@@ -22,6 +22,7 @@ export function EventForm({
   const [title, setTitle] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [location, setLocation] = useState("");
   const [memo, setMemo] = useState("");
   const [tag, setTag] = useState("");
   const [color, setColor] = useState<EventColorKey>(DEFAULT_EVENT_COLOR);
@@ -45,6 +46,7 @@ export function EventForm({
         date,
         startTime: startTime || null,
         endTime: endTime || null,
+        location: location.trim() || null,
         memo: memo.trim() || null,
         tag: normalizeEventTag(tag) || null,
         color: normalizeEventColor(color),
@@ -57,6 +59,7 @@ export function EventForm({
       setTitle("");
       setStartTime("");
       setEndTime("");
+      setLocation("");
       setMemo("");
       setTag("");
       setColor(DEFAULT_EVENT_COLOR);
@@ -93,6 +96,13 @@ export function EventForm({
           className="h-11 rounded border border-[#c9d7d2] px-3 outline-none transition focus:border-[#159a86]"
         />
       </div>
+
+      <input
+        value={location}
+        onChange={(event) => setLocation(event.target.value)}
+        placeholder="장소"
+        className="h-11 w-full rounded border border-[#c9d7d2] px-3 outline-none transition focus:border-[#159a86]"
+      />
 
       <EventAppearanceFields tag={tag} color={color} onTagChange={setTag} onColorChange={setColor} />
 
