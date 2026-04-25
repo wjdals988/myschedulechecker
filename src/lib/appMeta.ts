@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.19",
+    releasedAt: "2026-04-26",
+    title: "할일 탭 빠른 추가 버튼 제거와 의견 표시 정리",
+    changes: [
+      "할일 탭 상단의 역할이 겹치던 빠른 추가 + 버튼과 모바일 바텀시트를 제거했습니다.",
+      "할일이 없을 때의 안내 문구에서 제거된 + 버튼 안내를 삭제했습니다.",
+      "일정 의견과 할일 의견을 작성자명과 내용이 한 줄로 이어지는 형태로 정리했습니다.",
+    ],
+  },
+  {
     version: "0.5.18",
     releasedAt: "2026-04-26",
     title: "할일 추가 대상 표시와 버튼 텍스트 기준 정리",

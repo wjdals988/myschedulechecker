@@ -111,10 +111,11 @@ export function EventComments({
         {comments.map((comment) => (
           <div key={comment.id} className="rounded border border-[#d8e3df] bg-white p-3">
             <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-[#159a86]">{comment.authorLabel}</p>
-                <LinkifiedText text={comment.text} className="mt-1 block text-sm leading-6 text-[#273f3a]" />
-              </div>
+              <p className="min-w-0 text-sm leading-6 text-[#273f3a]">
+                <span className="font-bold text-[#159a86]">{comment.authorLabel}</span>
+                <span className="mx-1 text-[#687a75]">·</span>
+                <LinkifiedText text={comment.text} />
+              </p>
               {comment.authorUid === author.uid ? (
                 <button
                   type="button"

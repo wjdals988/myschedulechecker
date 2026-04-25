@@ -39,7 +39,6 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
   const { events, loading: eventsLoading, error: eventsError } = useEventsInRange(roomId, rangeStart, rangeEnd);
   const { todos, loading: todosLoading, error: todosError } = useTodosForEvents(roomId, events);
   const [incompleteOnly, setIncompleteOnly] = useState(false);
-  const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [targetEventId, setTargetEventId] = useState("");
   const [text, setText] = useState("");
   const [saving, setSaving] = useState(false);
@@ -106,7 +105,6 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
       });
       setText("");
       setMessage("할일을 추가했습니다.");
-      setQuickAddOpen(false);
       window.setTimeout(() => setMessage(null), 1800);
     } catch (caught) {
       setMessage(caught instanceof Error ? caught.message : "할일 추가에 실패했습니다.");
@@ -166,21 +164,12 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
   return (
     <main className="min-h-[calc(100vh-148px)] px-4 py-5 lg:px-6 lg:py-6">
       <section className="mb-5 flex flex-col gap-4 border-b border-[var(--border)] pb-5 lg:flex-row lg:items-end lg:justify-between">
-        <div className="flex items-start justify-between gap-3">
+        <div>
           <div>
             <p className="app-kicker text-[0.72rem] font-bold">To-do</p>
             <h1 className="mt-1 text-2xl font-bold text-[var(--foreground)]">{range === "week" ? "이번주 할일" : "이번달 할일"}</h1>
             <p className="mt-2 text-sm font-semibold text-[var(--muted)]">{title}</p>
           </div>
-
-          <button
-            type="button"
-            onClick={() => setQuickAddOpen(true)}
-            className="app-button-primary grid h-11 w-11 shrink-0 place-items-center xl:hidden"
-            aria-label="할일 빠른 추가"
-          >
-            <PlusIcon className="h-4 w-4" />
-          </button>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
@@ -253,7 +242,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
             <div className="app-panel p-5 text-center">
               <p className="font-bold text-[var(--foreground)]">{incompleteOnly && todos.length > 0 ? "미완료 할일이 없습니다." : "표시할 할일이 없습니다."}</p>
               <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                할일은 일정에 연결됩니다. 모바일에서는 우상단 + 버튼으로 빠르게 추가할 수 있습니다.
+                할일은 일정에 연결됩니다. 일정 화면에서 바로 추가하거나, 할일이 있는 날짜의 하단 입력란을 사용해 주세요.
               </p>
             </div>
           ) : (
@@ -294,29 +283,6 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
         </aside>
       </section>
 
-      {quickAddOpen ? (
-        <div className="fixed inset-0 z-40 flex items-end bg-black/45 xl:hidden" onClick={() => setQuickAddOpen(false)} role="presentation">
-          <section
-            className="max-h-[82dvh] w-full overflow-y-auto rounded-t-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-xl"
-            onClick={(event) => event.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-label="할일 빠른 추가"
-          >
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <div>
-                <p className="app-kicker text-[0.7rem] font-bold">Quick Add</p>
-                <h2 className="mt-1 text-lg font-bold text-[var(--foreground)]">일정에 할일 추가</h2>
-                <p className="mt-1 text-xs leading-5 text-[var(--muted)]">선택한 기간의 일정 중 하나에 할일을 연결합니다.</p>
-              </div>
-              <button type="button" onClick={() => setQuickAddOpen(false)} className="app-button-secondary h-9 shrink-0 px-3 text-sm font-semibold">
-                닫기
-              </button>
-            </div>
-            {quickAddPanel}
-          </section>
-        </div>
-      ) : null}
     </main>
   );
 }

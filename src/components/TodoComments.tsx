@@ -91,10 +91,11 @@ export function TodoComments({
           {comments.map((comment) => (
             <div key={comment.id} className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2">
               <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-[11px] font-bold text-[var(--accent)]">{comment.authorLabel}</p>
-                  <LinkifiedText text={comment.text} className="mt-1 block text-xs leading-5 text-[var(--foreground)]" />
-                </div>
+                <p className="min-w-0 text-xs leading-5 text-[var(--foreground)]">
+                  <span className="font-bold text-[var(--accent)]">{comment.authorLabel}</span>
+                  <span className="mx-1 text-[var(--muted)]">·</span>
+                  <LinkifiedText text={comment.text} />
+                </p>
                 {comment.authorUid === author.uid ? (
                   <button
                     type="button"
