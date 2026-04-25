@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { AgendaListPanel } from "@/components/AgendaListPanel";
 import { EventForm } from "@/components/EventForm";
 import { PlusIcon, TrashIcon } from "@/components/icons";
+import { LinkifiedText } from "@/components/LinkifiedText";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
 import { dateKey, dayLabel, getMonthGrid, isCurrentMonth, isToday, monthTitle, parseDateKey } from "@/lib/dates";
 import { getEventColorOption, normalizeEventTag } from "@/lib/eventAppearance";
@@ -282,7 +283,7 @@ export function MonthlyCalendar({ roomId, initialDate }: { roomId: string; initi
                           <div className="mt-1 text-sm opacity-80">
                             {event.startTime ?? "시간 없음"} {event.endTime ? `- ${event.endTime}` : ""}
                           </div>
-                          {event.memo ? <p className="mt-2 line-clamp-2 text-sm opacity-80">{event.memo}</p> : null}
+                          <div className="mt-1 text-[11px] font-semibold opacity-70">작성 {event.authorLabel}</div>
                         </button>
 
                         <button
@@ -295,6 +296,7 @@ export function MonthlyCalendar({ roomId, initialDate }: { roomId: string; initi
                           {deletingEventId === event.id ? "삭제 중" : "삭제"}
                         </button>
                       </div>
+                      {event.memo ? <LinkifiedText text={event.memo} className="mt-2 line-clamp-2 block text-sm opacity-80" /> : null}
                     </div>
                   );
                 })

@@ -6,6 +6,7 @@ import { ko } from "date-fns/locale";
 import Link from "next/link";
 import { ChangeEvent, KeyboardEvent, useMemo, useState } from "react";
 import { PlusIcon, TrashIcon } from "@/components/icons";
+import { hasLink, LinkifiedText } from "@/components/LinkifiedText";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
 import { useTodosForEvents } from "@/hooks/useTodosForEvents";
@@ -475,6 +476,9 @@ function TodoListItem({ roomId, todo }: { roomId: string; todo: TodoWithEvent })
             todo.done && "text-[var(--muted)] line-through",
           )}
         />
+        {hasLink(draft) ? (
+          <LinkifiedText text={draft} className="mt-2 block rounded-md bg-[var(--surface-muted)] px-3 py-2 text-xs leading-5 text-[var(--muted)]" />
+        ) : null}
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-[var(--muted)]">
           {tag ? <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-bold", colorOption.badgeClass)}>{tag}</span> : null}
           <span className={cn("h-2 w-2 rounded-full", colorOption.dotClass)} />

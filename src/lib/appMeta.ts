@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.13",
+    releasedAt: "2026-04-26",
+    title: "일정 표시와 링크 처리 개선",
+    changes: [
+      "일정 탭 상단 날짜 카드의 일정 점을 우상단으로 옮겨 메모 점과 함께 보이도록 정리했습니다.",
+      "일정과 To-do 목록에서 작성자 표시를 보강해 멤버 닉네임의 쓰임이 드러나게 했습니다.",
+      "메모, To-do, 의견에 입력된 URL을 클릭 가능한 링크로 표시합니다.",
+    ],
+  },
+  {
     version: "0.5.12",
     releasedAt: "2026-04-26",
     title: "할일 체크와 의견 기능 추가",

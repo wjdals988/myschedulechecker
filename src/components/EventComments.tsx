@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { KeyboardEvent, useEffect, useState } from "react";
 import { TrashIcon } from "@/components/icons";
+import { LinkifiedText } from "@/components/LinkifiedText";
 import { getDb } from "@/lib/firebase";
 import type { CommentItem } from "@/lib/types";
 
@@ -112,7 +113,7 @@ export function EventComments({
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-[#159a86]">{comment.authorLabel}</p>
-                <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-[#273f3a]">{comment.text}</p>
+                <LinkifiedText text={comment.text} className="mt-1 block text-sm leading-6 text-[#273f3a]" />
               </div>
               {comment.authorUid === author.uid ? (
                 <button

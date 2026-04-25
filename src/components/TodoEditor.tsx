@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react";
 import { PlusIcon, TrashIcon } from "@/components/icons";
+import { hasLink, LinkifiedText } from "@/components/LinkifiedText";
 import { getDb } from "@/lib/firebase";
 import type { TodoItem } from "@/lib/types";
 
@@ -133,7 +134,7 @@ function TodoRow({
   }
 
   return (
-    <div className="flex min-h-14 items-center gap-3 rounded border border-[#d8e3df] bg-white p-3">
+    <div className="flex min-h-14 items-start gap-3 rounded border border-[#d8e3df] bg-white p-3">
       <input
         type="checkbox"
         checked={todo.done}
@@ -143,15 +144,21 @@ function TodoRow({
             updatedAt: serverTimestamp(),
           })
         }
-        className="h-5 w-5 accent-[#159a86]"
+        className="mt-2 h-5 w-5 accent-[#159a86]"
       />
-      <input
-        value={draft}
-        onChange={handleChange}
-        onBlur={saveText}
-        onKeyDown={handleKeyDown}
-        className="min-w-0 flex-1 border-0 bg-transparent outline-none"
-      />
+      <div className="min-w-0 flex-1">
+        <input
+          value={draft}
+          onChange={handleChange}
+          onBlur={saveText}
+          onKeyDown={handleKeyDown}
+          className="w-full border-0 bg-transparent outline-none"
+        />
+        <p className="mt-1 text-[11px] font-semibold text-[#687a75]">작성 {todo.authorLabel}</p>
+        {hasLink(draft) ? (
+          <LinkifiedText text={draft} className="mt-2 block rounded-md bg-[#f8faf9] px-3 py-2 text-xs leading-5 text-[#52645f]" />
+        ) : null}
+      </div>
       <button
         onClick={() => deleteDoc(ref)}
         className="grid h-9 w-9 place-items-center rounded border border-red-200 text-red-600"

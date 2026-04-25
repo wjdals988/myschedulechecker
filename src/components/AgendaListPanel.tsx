@@ -3,6 +3,7 @@
 import { format } from "date-fns";
 import Link from "next/link";
 import { useState } from "react";
+import { LinkifiedText } from "@/components/LinkifiedText";
 import { useTodoProgressMap } from "@/hooks/useTodoProgressMap";
 import { dayLabel, parseDateKey, todayKey, weekdayLabel } from "@/lib/dates";
 import { getEventColorOption, normalizeEventTag } from "@/lib/eventAppearance";
@@ -165,14 +166,14 @@ function AgendaEventLink({
   const tag = normalizeEventTag(event.tag);
 
   return (
-    <Link
-      href={`/rooms/${roomId}/schedule/${event.id}?date=${event.date}`}
+    <div
       className={cn(
         "block w-full rounded-md border border-[#d8e3df] border-l-4 bg-white p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#159a86] hover:shadow-md",
         tone.accentClass,
       )}
     >
-      <div className="flex items-start justify-between gap-2">
+      <Link href={`/rooms/${roomId}/schedule/${event.id}?date=${event.date}`} className="block">
+        <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             {tag ? <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-bold", tone.badgeClass)}>{tag}</span> : null}
@@ -181,13 +182,15 @@ function AgendaEventLink({
           <div className="mt-1 text-xs font-semibold text-[#687a75]">
             {event.startTime ?? "시간 없음"} {event.endTime ? `- ${event.endTime}` : ""}
           </div>
+          <div className="mt-1 text-[11px] font-semibold text-[#687a75]">작성 {event.authorLabel}</div>
         </div>
         <div className="mt-1 flex items-center gap-2">
           <span className={cn("h-2 w-2 shrink-0 rounded-full", tone.dotClass)} />
           {event.memo ? <span className="h-2 w-2 shrink-0 rounded-full bg-[#df7a2f]" title="메모 있음" /> : null}
         </div>
-      </div>
-      {event.memo ? <p className="mt-2 line-clamp-2 text-sm leading-5 text-[#52645f]">{event.memo}</p> : null}
+        </div>
+      </Link>
+      {event.memo ? <LinkifiedText text={event.memo} className="mt-2 line-clamp-2 block text-sm leading-5 text-[#52645f]" /> : null}
       {progress && progress.total > 0 ? (
         <div className="mt-3">
           <div className="mb-1 flex items-center justify-between text-[11px] font-semibold text-[#687a75]">
@@ -201,6 +204,6 @@ function AgendaEventLink({
           </div>
         </div>
       ) : null}
-    </Link>
+    </div>
   );
 }

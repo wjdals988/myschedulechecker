@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AgendaListPanel } from "@/components/AgendaListPanel";
 import { EventForm } from "@/components/EventForm";
 import { CalendarIcon, CheckListIcon, PlusIcon } from "@/components/icons";
+import { LinkifiedText } from "@/components/LinkifiedText";
 import { useEventsByDate } from "@/hooks/useEventsByDate";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
 import { useTodosForEvents } from "@/hooks/useTodosForEvents";
@@ -185,8 +186,8 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                 {hasEvents ? (
                   <span
                     className={cn(
-                      "absolute bottom-2 h-1.5 w-1.5 rounded-full",
-                      active ? "bg-[#f6c177]" : "bg-[#d95b43]",
+                      "absolute right-4 top-2 h-1.5 w-1.5 rounded-full",
+                      "bg-[#d95b43]",
                     )}
                     title="일정 있음"
                   />
@@ -386,11 +387,12 @@ function SelectedDateEventList({
                     <p className="mt-1 text-xs font-semibold text-[var(--muted)]">
                       {event.startTime ?? "시간 없음"} {event.endTime ? `- ${event.endTime}` : ""}
                     </p>
+                    <p className="mt-1 text-[11px] font-semibold text-[var(--muted)]">작성 {event.authorLabel}</p>
                   </div>
                   <span className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", tone.dotClass)} />
                 </div>
-                {event.memo ? <p className="mt-2 line-clamp-2 text-sm leading-5 text-[var(--muted)]">{event.memo}</p> : null}
               </Link>
+              {event.memo ? <LinkifiedText text={event.memo} className="mt-2 line-clamp-2 block text-sm leading-5 text-[var(--muted)]" /> : null}
 
               <div className="mt-3 border-t border-[var(--border)] pt-3">
                 <div className="mb-2 flex items-center justify-between gap-2 text-[11px] font-semibold text-[var(--muted)]">
@@ -418,13 +420,17 @@ function SelectedDateEventList({
                           className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--accent)]"
                           aria-label={`${todo.text} 완료 상태 변경`}
                         />
-                        <span
-                          className={cn(
-                            "min-w-0 flex-1 break-words text-sm leading-5 text-[var(--foreground)]",
-                            todo.done && "line-through opacity-60",
-                          )}
-                        >
-                          {todo.text}
+                        <span className="min-w-0 flex-1">
+                          <LinkifiedText
+                            text={todo.text}
+                            className={cn(
+                              "block text-sm leading-5 text-[var(--foreground)]",
+                              todo.done && "line-through opacity-60",
+                            )}
+                          />
+                          <span className="mt-1 block text-[11px] font-semibold text-[var(--muted)]">
+                            작성 {todo.authorLabel}
+                          </span>
                         </span>
                       </li>
                     ))}
@@ -548,7 +554,7 @@ function ScheduleMonthPicker({
               {format(day, "d")}
               {hasEvents ? (
                 <span
-                  className="absolute bottom-1 h-1.5 w-1.5 rounded-full bg-[#d95b43]"
+                  className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-[#d95b43]"
                   title="일정 있음"
                 />
               ) : null}

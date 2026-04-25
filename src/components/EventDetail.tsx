@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { EventAppearanceFields } from "@/components/EventAppearanceFields";
 import { EventComments } from "@/components/EventComments";
+import { LinkifiedText } from "@/components/LinkifiedText";
 import { TodoEditor } from "@/components/TodoEditor";
 import { EditIcon, TrashIcon } from "@/components/icons";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
@@ -258,6 +259,12 @@ function EventEditor({
               placeholder="일정에 필요한 메모를 적어두세요."
             />
           </label>
+          {draft.memo.trim() ? (
+            <div className="rounded-md border border-[#d8e3df] bg-[#f8faf9] px-3 py-2">
+              <p className="text-xs font-semibold text-[#687a75]">메모 링크 미리보기</p>
+              <LinkifiedText text={draft.memo} className="mt-1 block text-sm leading-6 text-[#52645f]" />
+            </div>
+          ) : null}
         </div>
 
         {message ? (
