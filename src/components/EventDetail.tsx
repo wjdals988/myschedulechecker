@@ -5,14 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { EventAppearanceFields } from "@/components/EventAppearanceFields";
-import { EventComments } from "@/components/EventComments";
-import { LinkifiedText } from "@/components/LinkifiedText";
-import { TodoEditor } from "@/components/TodoEditor";
 import { EditIcon, TrashIcon } from "@/components/icons";
+import { LinkifiedText } from "@/components/LinkifiedText";
+import { ShareTargetButton } from "@/components/ShareTargetButton";
+import { TodoEditor } from "@/components/TodoEditor";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { useEvent } from "@/hooks/useEvent";
-import { getEventColorOption, normalizeEventColor, normalizeEventTag, type EventColorKey } from "@/lib/eventAppearance";
 import { deleteEventWithTodos } from "@/lib/eventMutations";
+import { getEventColorOption, normalizeEventColor, normalizeEventTag, type EventColorKey } from "@/lib/eventAppearance";
 import { getDb } from "@/lib/firebase";
 import { profileDisplayName } from "@/lib/profile";
 import type { EventItem } from "@/lib/types";
@@ -32,23 +32,25 @@ export function EventDetail({
   roomId,
   eventId,
   fallbackDate,
+  highlightTodoId,
 }: {
   roomId: string;
   eventId: string;
   fallbackDate: string;
+  highlightTodoId?: string | null;
 }) {
   const { event, loading, error } = useEvent(roomId, eventId);
 
   if (loading) {
-    return <main className="p-4 text-sm text-[#687a75]">일정 상세를 불러오는 중입니다.</main>;
+    return <main className="p-4 text-sm text-[var(--muted)]">일정 상세를 불러오는 중입니다.</main>;
   }
 
   if (error || !event) {
     return (
       <main className="p-4">
-        <div className="rounded-lg border border-[#d8e3df] bg-white p-5">
-          <h1 className="text-lg font-semibold">일정을 찾을 수 없습니다</h1>
-          <Link href={`/rooms/${roomId}/schedule?date=${fallbackDate}`} className="mt-4 inline-flex text-sm font-semibold text-[#159a86]">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+          <h1 className="text-lg font-semibold text-[var(--foreground)]">일정을 찾을 수 없습니다</h1>
+          <Link href={`/rooms/${roomId}/schedule?date=${fallbackDate}`} className="mt-4 inline-flex text-sm font-semibold text-[var(--accent)]">
             일정 목록으로 돌아가기
           </Link>
         </div>
@@ -56,17 +58,19 @@ export function EventDetail({
     );
   }
 
-  return <EventEditor key={event.id} roomId={roomId} eventId={eventId} event={event} />;
+  return <EventEditor key={event.id} roomId={roomId} eventId={eventId} event={event} highlightTodoId={highlightTodoId} />;
 }
 
 function EventEditor({
   roomId,
   eventId,
   event,
+  highlightTodoId,
 }: {
   roomId: string;
   eventId: string;
   event: EventItem;
+  highlightTodoId?: string | null;
 }) {
   const router = useRouter();
   const session = useAnonymousSession();
@@ -89,6 +93,7 @@ function EventEditor({
   }, [draft, event]);
 
   const colorOption = getEventColorOption(draft.color);
+  const author = session.uid && session.profile ? { uid: session.uid, label: profileDisplayName(session.profile) } : null;
 
   function updateDraft(field: keyof EventDraft, value: string | EventColorKey) {
     setDraft((current) => ({ ...current, [field]: value }));
@@ -150,20 +155,24 @@ function EventEditor({
     }
   }
 
-  const author = session.uid && session.profile ? { uid: session.uid, label: profileDisplayName(session.profile) } : null;
-
   return (
     <main className="space-y-5 px-4 py-5">
       <div className="flex items-center justify-between gap-3">
-        <Link href={`/rooms/${roomId}/schedule?date=${draft.date || event.date}`} className="text-sm font-semibold text-[#159a86]">
+        <Link href={`/rooms/${roomId}/schedule?date=${draft.date || event.date}`} className="text-sm font-semibold text-[var(--accent)]">
           목록으로
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <ShareTargetButton
+            path={`/rooms/${roomId}/schedule/${eventId}?date=${draft.date || event.date}`}
+            label="일정 공유"
+            title="일정 공유 링크 복사"
+            className="h-10 text-sm"
+          />
           <button
             type="button"
             onClick={resetDraft}
             disabled={!hasChanges || saving || deleting}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-[#c9d7d2] bg-white px-3 text-sm font-semibold text-[#273f3a] transition hover:border-[#159a86] disabled:opacity-45"
+            className="app-button-secondary inline-flex h-10 items-center justify-center px-3 text-sm font-semibold disabled:opacity-45"
           >
             취소
           </button>
@@ -179,11 +188,11 @@ function EventEditor({
         </div>
       </div>
 
-      <section className="rounded-lg border border-[#d8e3df] bg-white p-4 shadow-sm">
-        <div className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b border-[#d8e3df] pb-4">
+      <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-soft)]">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b border-[var(--border)] pb-4">
           <div>
-            <p className="text-sm font-semibold text-[#159a86]">Edit Schedule</p>
-            <h1 className="mt-1 text-2xl font-bold text-[#14211f]">일정 수정</h1>
+            <p className="text-sm font-semibold text-[var(--accent)]">Edit Schedule</p>
+            <h1 className="mt-1 text-2xl font-bold text-[var(--foreground)]">일정 수정</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {normalizeEventTag(draft.tag) ? (
@@ -191,53 +200,53 @@ function EventEditor({
                 {normalizeEventTag(draft.tag)}
               </span>
             ) : null}
-            <span className="rounded bg-[#eefaf7] px-2 py-1 text-xs font-semibold text-[#146c61]">
-              작성자 {event.authorLabel}
+            <span className="rounded bg-[var(--surface-muted)] px-2 py-1 text-xs font-semibold text-[var(--muted)]">
+              작성 {event.authorLabel}
             </span>
           </div>
         </div>
 
-        <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[#52645f]">
+        <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[var(--muted)]">
           <span className={cn("h-2.5 w-2.5 rounded-full", colorOption.dotClass)} />
           <span>{colorOption.label} 일정</span>
         </div>
 
         <div className="grid gap-4">
-          <label className="block text-sm font-semibold text-[#40534f]">
+          <label className="block text-sm font-semibold text-[var(--muted)]">
             제목
             <input
               value={draft.title}
               onChange={(change) => updateDraft("title", change.target.value)}
-              className="mt-2 h-12 w-full rounded-md border border-[#c9d7d2] px-3 text-xl font-bold outline-none transition focus:border-[#159a86]"
+              className="app-input mt-2 h-12 w-full px-3 text-xl font-bold"
             />
           </label>
 
           <div className="grid gap-3 sm:grid-cols-3">
-            <label className="block text-sm font-semibold text-[#40534f]">
+            <label className="block text-sm font-semibold text-[var(--muted)]">
               날짜
               <input
                 value={draft.date}
                 onChange={(change) => updateDraft("date", change.target.value)}
                 type="date"
-                className="mt-2 h-11 w-full rounded-md border border-[#c9d7d2] px-3 outline-none transition focus:border-[#159a86]"
+                className="app-input mt-2 h-11 w-full px-3"
               />
             </label>
-            <label className="block text-sm font-semibold text-[#40534f]">
+            <label className="block text-sm font-semibold text-[var(--muted)]">
               시작
               <input
                 value={draft.startTime}
                 onChange={(change) => updateDraft("startTime", change.target.value)}
                 type="time"
-                className="mt-2 h-11 w-full rounded-md border border-[#c9d7d2] px-3 outline-none transition focus:border-[#159a86]"
+                className="app-input mt-2 h-11 w-full px-3"
               />
             </label>
-            <label className="block text-sm font-semibold text-[#40534f]">
+            <label className="block text-sm font-semibold text-[var(--muted)]">
               종료
               <input
                 value={draft.endTime}
                 onChange={(change) => updateDraft("endTime", change.target.value)}
                 type="time"
-                className="mt-2 h-11 w-full rounded-md border border-[#c9d7d2] px-3 outline-none transition focus:border-[#159a86]"
+                className="app-input mt-2 h-11 w-full px-3"
               />
             </label>
           </div>
@@ -249,26 +258,26 @@ function EventEditor({
             onColorChange={(value) => updateDraft("color", value)}
           />
 
-          <label className="block text-sm font-semibold text-[#40534f]">
+          <label className="block text-sm font-semibold text-[var(--muted)]">
             메모
             <textarea
               value={draft.memo}
               onChange={(change) => updateDraft("memo", change.target.value)}
               rows={5}
-              className="mt-2 w-full resize-none rounded-md border border-[#c9d7d2] px-3 py-2 outline-none transition focus:border-[#159a86]"
+              className="app-input mt-2 w-full resize-none px-3 py-2"
               placeholder="일정에 필요한 메모를 적어두세요."
             />
           </label>
           {draft.memo.trim() ? (
-            <div className="rounded-md border border-[#d8e3df] bg-[#f8faf9] px-3 py-2">
-              <p className="text-xs font-semibold text-[#687a75]">메모 링크 미리보기</p>
-              <LinkifiedText text={draft.memo} className="mt-1 block text-sm leading-6 text-[#52645f]" />
+            <div className="rounded-md border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2">
+              <p className="text-xs font-semibold text-[var(--muted)]">메모 링크 미리보기</p>
+              <LinkifiedText text={draft.memo} className="mt-1 block text-sm leading-6 text-[var(--muted)]" />
             </div>
           ) : null}
         </div>
 
         {message ? (
-          <p className="mt-4 rounded-md border border-[#d8e3df] bg-[#f8faf9] px-3 py-2 text-sm font-semibold text-[#52645f]">
+          <p className="mt-4 rounded-md border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm font-semibold text-[var(--muted)]">
             {message}
           </p>
         ) : null}
@@ -277,7 +286,7 @@ function EventEditor({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-bold text-red-700">일정 삭제</p>
-              <p className="mt-1 text-xs leading-5 text-red-600">삭제하면 이 일정과 연결된 To-do와 의견도 함께 삭제됩니다.</p>
+              <p className="mt-1 text-xs leading-5 text-red-600">삭제하면 이 일정과 연결된 To-do, 의견이 함께 삭제됩니다.</p>
             </div>
             {deleteConfirmOpen ? (
               <div className="grid grid-cols-2 gap-2 sm:flex">
@@ -313,27 +322,15 @@ function EventEditor({
         </div>
       </section>
 
-      <section className="rounded-lg border border-[#d8e3df] bg-white p-4 shadow-sm">
+      <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-soft)]">
         <div className="mb-4">
-          <p className="text-sm font-semibold text-[#159a86]">To-do</p>
-          <h2 className="text-xl font-bold">해야 할 일</h2>
+          <p className="text-sm font-semibold text-[var(--accent)]">To-do</p>
+          <h2 className="text-xl font-bold text-[var(--foreground)]">해야 할 일</h2>
         </div>
         {author ? (
-          <TodoEditor roomId={roomId} eventId={eventId} author={author} />
+          <TodoEditor roomId={roomId} eventId={eventId} author={author} highlightTodoId={highlightTodoId} />
         ) : (
-          <p className="text-sm text-[#687a75]">작성자 정보를 준비하는 중입니다.</p>
-        )}
-      </section>
-
-      <section className="rounded-lg border border-[#d8e3df] bg-white p-4 shadow-sm">
-        <div className="mb-4">
-          <p className="text-sm font-semibold text-[#159a86]">Comments</p>
-          <h2 className="text-xl font-bold">의견</h2>
-        </div>
-        {author ? (
-          <EventComments roomId={roomId} eventId={eventId} author={author} />
-        ) : (
-          <p className="text-sm text-[#687a75]">작성자 정보를 준비하는 중입니다.</p>
+          <p className="text-sm text-[var(--muted)]">작성자 정보를 준비하는 중입니다.</p>
         )}
       </section>
     </main>

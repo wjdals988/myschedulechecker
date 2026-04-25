@@ -1,6 +1,6 @@
 "use client";
 
-import { doc, onSnapshot, serverTimestamp, updateDoc } from "firebase/firestore";
+import { doc, onSnapshot, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -53,6 +53,29 @@ export function RoomShell({
       nickname: session.profile.nickname ?? null,
       lastSeenAt: serverTimestamp(),
     }).catch(() => undefined);
+
+    setDoc(
+      doc(getDb(), "roomPublic", roomId),
+      {
+        name: room.name,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    ).catch(() => undefined);
+
+    setDoc(
+      doc(getDb(), "roomCodePublic", room.inviteCode),
+      {
+        roomId,
+        name: room.name,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    ).catch(() => undefined);
+
+    document.title = `${room.name} | 공유 일정 관리`;
+    updateMetaTag("property", "og:title", room.name);
+    updateMetaTag("name", "twitter:title", room.name);
 
     saveRecentRoom({
       roomId,
@@ -211,4 +234,16 @@ export function RoomShell({
       </nav>
     </div>
   );
+}
+
+function updateMetaTag(attribute: "name" | "property", key: string, content: string) {
+  let element = document.head.querySelector<HTMLMetaElement>(`meta[${attribute}="${key}"]`);
+
+  if (!element) {
+    element = document.createElement("meta");
+    element.setAttribute(attribute, key);
+    document.head.appendChild(element);
+  }
+
+  element.content = content;
 }

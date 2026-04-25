@@ -1,5 +1,5 @@
-import localFont from "next/font/local";
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import { themeInitScript } from "@/lib/theme";
 
@@ -12,7 +12,8 @@ const maruBuri = localFont({
 
 const appTitle = "정민나니 스케줄";
 const browserTitle = "공유 일정 관리";
-const description = "함께 쓰는 공유 일정과 할 일 관리 앱";
+const description = "초대 코드로 함께 쓰는, 우리만의 스마트 공유 일정";
+const ogImage = "/og-image.png";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://checker-jm.vercel.app"),
@@ -23,17 +24,26 @@ export const metadata: Metadata = {
   },
   description,
   openGraph: {
-    title: appTitle,
+    title: browserTitle,
     description,
     url: "https://checker-jm.vercel.app",
     siteName: appTitle,
+    images: [
+      {
+        url: ogImage,
+        width: 1792,
+        height: 1024,
+        alt: "공유 일정 관리 미리보기",
+      },
+    ],
     locale: "ko_KR",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: appTitle,
+    title: browserTitle,
     description,
+    images: [ogImage],
   },
 };
 
@@ -47,9 +57,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript() }} />
       </head>
-      <body className="antialiased">
-        {children}
-      </body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

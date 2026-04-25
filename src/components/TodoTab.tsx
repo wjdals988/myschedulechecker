@@ -1,16 +1,19 @@
 "use client";
 
-import { addDoc, collection, deleteDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { addMonths, addWeeks, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek, subMonths, subWeeks } from "date-fns";
 import { ko } from "date-fns/locale";
 import Link from "next/link";
-import { ChangeEvent, KeyboardEvent, useMemo, useState } from "react";
-import { PlusIcon, TrashIcon } from "@/components/icons";
-import { hasLink, LinkifiedText } from "@/components/LinkifiedText";
+import { useMemo, useState } from "react";
+import { EditIcon, PlusIcon, TrashIcon } from "@/components/icons";
+import { LinkifiedText } from "@/components/LinkifiedText";
+import { ShareTargetButton } from "@/components/ShareTargetButton";
+import { TodoComments } from "@/components/TodoComments";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
 import { useTodosForEvents } from "@/hooks/useTodosForEvents";
 import { dateKey, parseDateKey, todayKey } from "@/lib/dates";
+import { deleteTodoWithComments } from "@/lib/eventMutations";
 import { getEventColorOption, normalizeEventTag } from "@/lib/eventAppearance";
 import { getDb } from "@/lib/firebase";
 import { profileDisplayName } from "@/lib/profile";
@@ -28,10 +31,14 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
   const rangeEnd = dateKey(rangeEndDate);
   const previousDate = dateKey(range === "week" ? subWeeks(selected, 1) : subMonths(selected, 1));
   const nextDate = dateKey(range === "week" ? addWeeks(selected, 1) : addMonths(selected, 1));
-  const title = range === "week" ? `${format(rangeStartDate, "M월 d일", { locale: ko })} - ${format(rangeEndDate, "M월 d일", { locale: ko })}` : format(rangeStartDate, "yyyy년 M월", { locale: ko });
+  const title =
+    range === "week"
+      ? `${format(rangeStartDate, "M월 d일", { locale: ko })} - ${format(rangeEndDate, "M월 d일", { locale: ko })}`
+      : format(rangeStartDate, "yyyy년 M월", { locale: ko });
+
   const { events, loading: eventsLoading, error: eventsError } = useEventsInRange(roomId, rangeStart, rangeEnd);
   const { todos, loading: todosLoading, error: todosError } = useTodosForEvents(roomId, events);
-  const [incompleteOnly, setIncompleteOnly] = useState(true);
+  const [incompleteOnly, setIncompleteOnly] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [targetEventId, setTargetEventId] = useState("");
   const [text, setText] = useState("");
@@ -39,10 +46,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
   const [message, setMessage] = useState<string | null>(null);
   const effectiveTargetEventId = events.some((event) => event.id === targetEventId) ? targetEventId : (events[0]?.id ?? "");
 
-  const visibleTodos = useMemo(() => {
-    return incompleteOnly ? todos.filter((todo) => !todo.done) : todos;
-  }, [incompleteOnly, todos]);
-
+  const visibleTodos = useMemo(() => (incompleteOnly ? todos.filter((todo) => !todo.done) : todos), [incompleteOnly, todos]);
   const groupedTodos = useMemo(() => {
     const groups = visibleTodos.reduce<Record<string, TodoWithEvent[]>>((acc, todo) => {
       acc[todo.eventDate] = [...(acc[todo.eventDate] ?? []), todo];
@@ -261,7 +265,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
                   </div>
                   <div className="divide-y divide-[var(--border)]">
                     {group.todos.map((todo) => (
-                      <TodoListItem key={`${todo.eventId}:${todo.id}:${todo.text}`} roomId={roomId} todo={todo} />
+                      <TodoListItem key={`${todo.eventId}:${todo.id}`} roomId={roomId} todo={todo} author={author} />
                     ))}
                   </div>
                   <DateTodoQuickAdd roomId={roomId} date={group.date} events={eventsByDate[group.date] ?? []} author={author} />
@@ -285,11 +289,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
       </section>
 
       {quickAddOpen ? (
-        <div
-          className="fixed inset-0 z-40 flex items-end bg-black/45 xl:hidden"
-          onClick={() => setQuickAddOpen(false)}
-          role="presentation"
-        >
+        <div className="fixed inset-0 z-40 flex items-end bg-black/45 xl:hidden" onClick={() => setQuickAddOpen(false)} role="presentation">
           <section
             className="max-h-[82dvh] w-full overflow-y-auto rounded-t-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-xl"
             onClick={(event) => event.stopPropagation()}
@@ -303,11 +303,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
                 <h2 className="mt-1 text-lg font-bold text-[var(--foreground)]">일정에 할일 추가</h2>
                 <p className="mt-1 text-xs leading-5 text-[var(--muted)]">선택한 기간의 일정 중 하나에 할일을 연결합니다.</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setQuickAddOpen(false)}
-                className="app-button-secondary h-9 shrink-0 px-3 text-sm font-semibold"
-              >
+              <button type="button" onClick={() => setQuickAddOpen(false)} className="app-button-secondary h-9 shrink-0 px-3 text-sm font-semibold">
                 닫기
               </button>
             </div>
@@ -372,7 +368,7 @@ function DateTodoQuickAdd({
             value={effectiveTargetEventId}
             onChange={(event) => setTargetEventId(event.target.value)}
             className="app-input h-8 max-w-[12rem] px-2 text-xs"
-            aria-label={`${date} 할일을 연결할 일정 선택`}
+            aria-label={`${date} 할일에 연결할 일정 선택`}
           >
             {events.map((event) => (
               <option key={event.id} value={event.id}>
@@ -420,8 +416,17 @@ function TodoStat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function TodoListItem({ roomId, todo }: { roomId: string; todo: TodoWithEvent }) {
+function TodoListItem({
+  roomId,
+  todo,
+  author,
+}: {
+  roomId: string;
+  todo: TodoWithEvent;
+  author: { uid: string; label: string } | null;
+}) {
   const [draft, setDraft] = useState(todo.text);
+  const [editing, setEditing] = useState(false);
   const ref = doc(getDb(), "rooms", roomId, "events", todo.eventId, "todos", todo.id);
   const colorOption = getEventColorOption(todo.eventColor);
   const tag = normalizeEventTag(todo.eventTag);
@@ -430,79 +435,124 @@ function TodoListItem({ roomId, todo }: { roomId: string; todo: TodoWithEvent })
     const trimmed = draft.trim();
     if (!trimmed) {
       setDraft(todo.text);
+      setEditing(false);
       return;
     }
-    if (trimmed === todo.text) return;
+    if (trimmed === todo.text) {
+      setEditing(false);
+      return;
+    }
 
     await updateDoc(ref, {
       text: trimmed,
       updatedAt: serverTimestamp(),
     });
-  }
-
-  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Enter") {
-      event.currentTarget.blur();
-    }
-  }
-
-  function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    setDraft(event.target.value);
+    setEditing(false);
   }
 
   return (
-    <article className="grid gap-3 px-4 py-3 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
-      <input
-        type="checkbox"
-        checked={todo.done}
-        onChange={(event) =>
-          updateDoc(ref, {
-            done: event.target.checked,
-            updatedAt: serverTimestamp(),
-          })
-        }
-        className="h-5 w-5 accent-[var(--accent)]"
-        aria-label="할일 완료 여부"
-      />
-
-      <div className="min-w-0">
+    <article className="px-4 py-3">
+      <div className="grid gap-3 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-start">
         <input
-          value={draft}
-          onChange={handleChange}
-          onBlur={saveText}
-          onKeyDown={handleKeyDown}
-          className={cn(
-            "w-full border-0 bg-transparent text-base font-semibold text-[var(--foreground)] outline-none",
-            todo.done && "text-[var(--muted)] line-through",
-          )}
+          type="checkbox"
+          checked={todo.done}
+          onChange={(event) =>
+            updateDoc(ref, {
+              done: event.target.checked,
+              updatedAt: serverTimestamp(),
+            })
+          }
+          className="mt-1 h-5 w-5 accent-[var(--accent)]"
+          aria-label="할일 완료 여부"
         />
-        {hasLink(draft) ? (
-          <LinkifiedText text={draft} className="mt-2 block rounded-md bg-[var(--surface-muted)] px-3 py-2 text-xs leading-5 text-[var(--muted)]" />
-        ) : null}
-        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-[var(--muted)]">
-          {tag ? <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-bold", colorOption.badgeClass)}>{tag}</span> : null}
-          <span className={cn("h-2 w-2 rounded-full", colorOption.dotClass)} />
-          <Link href={`/rooms/${roomId}/schedule/${todo.eventId}?date=${todo.eventDate}`} className="truncate text-[var(--accent)] hover:underline">
-            {todo.eventTitle}
+
+        <div className="min-w-0">
+          {editing ? (
+            <div className="space-y-2">
+              <input
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") saveText();
+                  if (event.key === "Escape") {
+                    setDraft(todo.text);
+                    setEditing(false);
+                  }
+                }}
+                className="app-input h-10 w-full px-3 text-sm"
+                autoFocus
+              />
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={saveText} className="app-button-primary h-8 px-3 text-xs font-semibold">
+                  저장
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDraft(todo.text);
+                    setEditing(false);
+                  }}
+                  className="app-button-secondary h-8 px-3 text-xs font-semibold"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          ) : (
+            <LinkifiedText
+              text={todo.text}
+              className={cn(
+                "block text-base font-semibold leading-6 text-[var(--foreground)]",
+                todo.done && "text-[var(--muted)] line-through",
+              )}
+            />
+          )}
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-[var(--muted)]">
+            {tag ? <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-bold", colorOption.badgeClass)}>{tag}</span> : null}
+            <span className={cn("h-2 w-2 rounded-full", colorOption.dotClass)} />
+            <Link href={`/rooms/${roomId}/schedule/${todo.eventId}?date=${todo.eventDate}`} className="truncate text-[var(--accent)] hover:underline">
+              {todo.eventTitle}
+            </Link>
+            <span>{todo.eventStartTime ?? "시간 없음"}</span>
+            <span>작성 {todo.authorLabel}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2">
+          <ShareTargetButton
+            path={`/rooms/${roomId}/schedule/${todo.eventId}?date=${todo.eventDate}&todo=${todo.id}#todo-${todo.id}`}
+            label="공유"
+            title="할일 공유 링크 복사"
+            iconOnly
+          />
+          <button
+            type="button"
+            onClick={() => setEditing((value) => !value)}
+            className="app-button-secondary inline-flex h-9 items-center justify-center gap-1.5 px-2.5 text-xs font-semibold hover:border-[var(--accent)]"
+            title="할일 수정"
+          >
+            <EditIcon className="h-4 w-4" />
+            <span className="hidden sm:inline">수정</span>
+          </button>
+          <Link href={`/rooms/${roomId}/schedule/${todo.eventId}?date=${todo.eventDate}&todo=${todo.id}#todo-${todo.id}`} className="app-button-secondary inline-flex h-9 items-center justify-center px-3 text-xs font-semibold hover:border-[var(--accent)]">
+            상세
           </Link>
-          <span>{todo.eventStartTime ?? "시간 없음"}</span>
-          <span>작성자 {todo.authorLabel}</span>
+          <button
+            type="button"
+            onClick={() => deleteTodoWithComments(roomId, todo.eventId, todo.id)}
+            className="grid h-9 w-9 place-items-center rounded-md border border-red-200 text-red-600"
+            title="할일 삭제"
+          >
+            <TrashIcon className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-2">
-        <Link href={`/rooms/${roomId}/schedule/${todo.eventId}?date=${todo.eventDate}`} className="app-button-secondary inline-flex h-9 items-center justify-center px-3 text-xs font-semibold hover:border-[var(--accent)]">
-          상세
-        </Link>
-        <button
-          type="button"
-          onClick={() => deleteDoc(ref)}
-          className="grid h-9 w-9 place-items-center rounded-md border border-red-200 text-red-600"
-          title="할일 삭제"
-        >
-          <TrashIcon className="h-4 w-4" />
-        </button>
-      </div>
+      {author ? (
+        <div className="mt-3 sm:ml-8">
+          <TodoComments roomId={roomId} eventId={todo.eventId} todoId={todo.id} author={author} />
+        </div>
+      ) : null}
     </article>
   );
 }

@@ -26,6 +26,25 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    match /roomPublic/{roomId} {
+      allow read: if true;
+      allow create, update: if isMember(roomId)
+        && request.resource.data.name is string
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if false;
+    }
+
+    match /roomCodePublic/{inviteCode} {
+      allow read: if true;
+      allow create, update: if signedIn()
+        && request.resource.data.roomId is string
+        && request.resource.data.name is string
+        && request.resource.data.updatedAt is timestamp
+        && isMember(request.resource.data.roomId)
+        && get(/databases/$(database)/documents/rooms/$(request.resource.data.roomId)).data.inviteCode == inviteCode;
+      allow delete: if false;
+    }
+
     match /rooms/{roomId} {
       allow create: if signedIn()
         && request.resource.data.createdBy == request.auth.uid
@@ -49,6 +68,10 @@ service cloud.firestore {
 
         match /todos/{todoId} {
           allow read, create, update, delete: if isMember(roomId);
+
+          match /comments/{commentId} {
+            allow read, create, update, delete: if isMember(roomId);
+          }
         }
 
         match /comments/{commentId} {
