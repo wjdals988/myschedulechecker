@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.11",
+    releasedAt: "2026-04-26",
+    title: "일정 표시 점과 달력 바로가기 개선",
+    changes: [
+      "일정 탭 상단 날짜 스트립에서 일정이 있는 날짜에는 빨간 점을 표시합니다.",
+      "메모가 있는 날짜의 주황 점과 일정이 있는 날짜의 빨간 점을 분리해 의미를 명확하게 했습니다.",
+      "개인 메뉴에 이 방 달력 바로가기 복사 안내를 추가하고, 방별 PWA manifest를 연결했습니다.",
+    ],
+  },
+  {
     version: "0.5.10",
     releasedAt: "2026-04-26",
     title: "선택일 To-do 노출 개선",

@@ -41,6 +41,7 @@ export function PersonalMenu({
   const [open, setOpen] = useState(false);
   const [nicknameDraft, setNicknameDraft] = useState(profile.nickname ?? "");
   const [profileStatus, setProfileStatus] = useState<"idle" | "saved" | "failed">("idle");
+  const [shortcutStatus, setShortcutStatus] = useState<"idle" | "copied" | "failed">("idle");
   const [desktopPanelPosition, setDesktopPanelPosition] = useState<DesktopPanelPosition>({ top: 80, right: 16 });
   const { members, loading, error } = useRoomMembers(roomId, uid);
   const displayName = profileDisplayName(profile);
@@ -113,6 +114,19 @@ export function PersonalMenu({
     });
   }
 
+  async function copyCalendarShortcutLink() {
+    const shortcutUrl = `${window.location.origin}/rooms/${roomId}/calendar`;
+
+    try {
+      await window.navigator.clipboard.writeText(shortcutUrl);
+      setShortcutStatus("copied");
+      window.setTimeout(() => setShortcutStatus("idle"), 2400);
+    } catch {
+      setShortcutStatus("failed");
+      window.setTimeout(() => setShortcutStatus("idle"), 2400);
+    }
+  }
+
   const menuContent = (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex-1 overflow-y-auto px-4 pb-[calc(env(safe-area-inset-bottom)+1.2rem)] pt-3 sm:px-5 sm:py-5">
@@ -154,6 +168,28 @@ export function PersonalMenu({
             <ShareIcon className="h-4 w-4" />
             {shareStatus === "copied" ? "초대 링크 복사됨" : shareStatus === "failed" ? "복사 실패" : "초대 링크 복사"}
           </button>
+
+          <div className="app-subtle-panel p-3">
+            <div className="flex items-start gap-3">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[var(--accent-weak)] text-[var(--accent)]">
+                <CalendarIcon className="h-4 w-4" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-[var(--foreground)]">이 방 달력 바로가기</p>
+                <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                  링크를 복사한 뒤 모바일 브라우저에서 열고, 공유 메뉴의 홈 화면에 추가를 누르면 이 방 달력으로 바로 열립니다.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={copyCalendarShortcutLink}
+              className="app-button-secondary mt-3 inline-flex h-10 w-full items-center justify-center gap-2 px-3 text-sm font-semibold hover:border-[var(--accent)]"
+            >
+              <CalendarIcon className="h-4 w-4" />
+              {shortcutStatus === "copied" ? "달력 바로가기 복사됨" : shortcutStatus === "failed" ? "복사 실패" : "달력 바로가기 복사"}
+            </button>
+          </div>
 
           <div className="app-subtle-panel p-3">
             <div className="mb-2 flex items-center justify-between gap-3">

@@ -48,6 +48,13 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
   const pickerRangeStart = dateKey(pickerDays[0] ?? pickerMonth);
   const pickerRangeEnd = dateKey(pickerDays[pickerDays.length - 1] ?? pickerMonth);
   const { byDate: pickerByDate, loading: pickerLoading } = useEventsInRange(roomId, pickerRangeStart, pickerRangeEnd);
+  const pickerMarkerByDate = useMemo(
+    () => ({
+      ...stripByDate,
+      ...pickerByDate,
+    }),
+    [pickerByDate, stripByDate],
+  );
   const monthEvents = rangeEvents.filter((event) => isCurrentMonth(parseDateKey(event.date), selectedMonth));
   const holidayMap = getKoreanHolidayMapForDates(
     Array.from({ length: 42 }, (_, index) => format(addDays(selectedMonth, index), "yyyy-MM-dd")),
@@ -114,7 +121,7 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                 pickerMonth={pickerMonth}
                 selectedDate={date}
                 days={pickerDays}
-                byDate={pickerByDate}
+                byDate={pickerMarkerByDate}
                 loading={pickerLoading}
                 onPreviousMonth={() => setPickerMonth((month) => subMonths(month, 1))}
                 onNextMonth={() => setPickerMonth((month) => addMonths(month, 1))}
@@ -135,7 +142,9 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
           {days.map((day) => {
             const key = format(day, "yyyy-MM-dd");
             const active = key === date;
-            const hasMemo = (stripByDate[key] ?? []).some((event) => event.memo);
+            const eventsForDay = stripByDate[key] ?? [];
+            const hasEvents = eventsForDay.length > 0;
+            const hasMemo = eventsForDay.some((event) => event.memo);
             const holiday = holidayMap[key];
 
             return (
@@ -171,6 +180,15 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
                     title="메모 있음"
                   />
                 ) : null}
+                {hasEvents ? (
+                  <span
+                    className={cn(
+                      "absolute bottom-2 h-1.5 w-1.5 rounded-full",
+                      active ? "bg-[#f6c177]" : "bg-[#d95b43]",
+                    )}
+                    title="일정 있음"
+                  />
+                ) : null}
               </Link>
             );
           })}
@@ -179,6 +197,10 @@ export function ScheduleTab({ roomId, date }: { roomId: string; date: string }) 
           <span className="inline-flex items-center gap-1">
             <span className="text-[#d95b43]">빨간 날짜</span>
             공휴일
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#d95b43]" />
+            일정 있음
           </span>
           <span className="inline-flex items-center gap-1">
             <span className="h-1.5 w-1.5 rounded-full bg-[#df7a2f]" />
