@@ -105,23 +105,17 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
 
   const quickAddPanel = (
     <div className="space-y-3">
-      <label className="block text-sm font-semibold text-[var(--muted)]">
-        연결할 일정
-        <select
-          value={effectiveTargetEventId}
-          onChange={(event) => setTargetEventId(event.target.value)}
-          disabled={events.length === 0}
-          className="app-input mt-2 h-11 w-full px-3 text-sm"
-        >
-          {events.length === 0 ? <option value="">기간 내 일정 없음</option> : null}
-          {events.map((event) => (
-            <option key={event.id} value={event.id}>
-              {event.date} {event.startTime ? `${event.startTime} ` : ""}
-              {event.title}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div>
+        <p className="text-sm font-semibold text-[var(--muted)]">연결할 일정</p>
+        <EventChoiceList
+          events={events}
+          selectedEventId={effectiveTargetEventId}
+          onSelect={setTargetEventId}
+          emptyLabel="기간 내 일정 없음"
+          className="mt-2 max-h-44 overflow-y-auto pr-1"
+          showDate
+        />
+      </div>
 
       <label className="block text-sm font-semibold text-[var(--muted)]">
         할일
@@ -268,7 +262,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
                       <TodoListItem key={`${todo.eventId}:${todo.id}`} roomId={roomId} todo={todo} author={author} />
                     ))}
                   </div>
-                  <DateTodoQuickAdd roomId={roomId} date={group.date} events={eventsByDate[group.date] ?? []} author={author} />
+                  <DateTodoQuickAdd roomId={roomId} events={eventsByDate[group.date] ?? []} author={author} />
                 </section>
               ))}
             </div>
@@ -317,12 +311,10 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
 
 function DateTodoQuickAdd({
   roomId,
-  date,
   events,
   author,
 }: {
   roomId: string;
-  date: string;
   events: EventItem[];
   author: { uid: string; label: string } | null;
 }) {
@@ -361,22 +353,16 @@ function DateTodoQuickAdd({
 
   return (
     <div className="border-t border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3">
-      <div className="mb-2 flex items-center justify-between gap-3">
+      <div className="mb-2">
         <p className="text-xs font-bold text-[var(--muted)]">이 날짜에 할일 추가</p>
         {events.length > 1 ? (
-          <select
-            value={effectiveTargetEventId}
-            onChange={(event) => setTargetEventId(event.target.value)}
-            className="app-input h-8 max-w-[12rem] px-2 text-xs"
-            aria-label={`${date} 할일에 연결할 일정 선택`}
-          >
-            {events.map((event) => (
-              <option key={event.id} value={event.id}>
-                {event.startTime ? `${event.startTime} ` : ""}
-                {event.title}
-              </option>
-            ))}
-          </select>
+          <EventChoiceList
+            events={events}
+            selectedEventId={effectiveTargetEventId}
+            onSelect={setTargetEventId}
+            emptyLabel="이 날짜에 일정이 없습니다."
+            className="mt-2"
+          />
         ) : null}
       </div>
 
@@ -403,6 +389,60 @@ function DateTodoQuickAdd({
       </div>
 
       {message ? <p className="mt-2 text-xs font-semibold text-[var(--muted)]">{message}</p> : null}
+    </div>
+  );
+}
+
+function EventChoiceList({
+  events,
+  selectedEventId,
+  onSelect,
+  emptyLabel,
+  className,
+  showDate = false,
+}: {
+  events: EventItem[];
+  selectedEventId: string;
+  onSelect: (eventId: string) => void;
+  emptyLabel: string;
+  className?: string;
+  showDate?: boolean;
+}) {
+  if (events.length === 0) {
+    return (
+      <div className={cn("rounded-md border border-dashed border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm font-semibold text-[var(--muted)]", className)}>
+        {emptyLabel}
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("grid gap-1.5", className)} role="radiogroup" aria-label="연결할 일정 선택">
+      {events.map((event) => {
+        const selected = event.id === selectedEventId;
+
+        return (
+          <button
+            key={event.id}
+            type="button"
+            onClick={() => onSelect(event.id)}
+            className={cn(
+              "flex min-h-9 w-full min-w-0 items-center gap-2 rounded-md border px-3 py-2 text-left text-xs font-semibold transition",
+              selected
+                ? "border-[var(--selection-border)] bg-[var(--selection-surface)] text-[var(--selection-foreground)]"
+                : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] hover:border-[var(--accent)]",
+            )}
+            role="radio"
+            aria-checked={selected}
+          >
+            <span className="shrink-0 text-[var(--accent)]">{event.startTime ?? "시간 없음"}</span>
+            <span className="min-w-0 flex-1 truncate">
+              {showDate ? `${event.date} ` : ""}
+              {event.title}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
