@@ -11,6 +11,15 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.21",
+    releasedAt: "2026-04-27",
+    title: "공유 동작 피드백 개선",
+    changes: [
+      "일정 탭의 선택일 일정 카드에도 일정 공유 버튼을 추가했습니다.",
+      "아이콘만 보이는 할일 공유 버튼은 복사 성공 또는 실패 상태를 작은 배지로 표시하도록 개선했습니다.",
+    ],
+  },
+  {
     version: "0.5.20",
     releasedAt: "2026-04-26",
     title: "할일 의견 가독성 개선",
