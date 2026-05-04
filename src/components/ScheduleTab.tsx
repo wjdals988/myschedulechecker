@@ -15,6 +15,7 @@ import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { useEventsByDate } from "@/hooks/useEventsByDate";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
 import { useTodosForEvents } from "@/hooks/useTodosForEvents";
+import { recordRoomActivity, todoActivityHref, todoTabActivityHref } from "@/lib/activity";
 import { dateKey, isCurrentMonth, parseDateKey, todayKey } from "@/lib/dates";
 import { getEventColorOption, normalizeEventTag } from "@/lib/eventAppearance";
 import { getDb } from "@/lib/firebase";
@@ -336,6 +337,35 @@ function SelectedDateEventList({
   todosLoading: boolean;
   todosError: string | null;
 }) {
+  const session = useAnonymousSession();
+  const actor =
+    session.uid && session.profile
+      ? {
+          uid: session.uid,
+          label: profileDisplayName(session.profile),
+        }
+      : null;
+
+  async function toggleTodoDone(todo: TodoWithEvent, nextDone: boolean) {
+    await updateDoc(doc(getDb(), "rooms", roomId, "events", todo.eventId, "todos", todo.id), {
+      done: nextDone,
+      updatedAt: serverTimestamp(),
+    });
+    if (actor) {
+      await recordRoomActivity(roomId, {
+        type: nextDone ? "todo.completed" : "todo.reopened",
+        actor,
+        targetType: "todo",
+        targetId: todo.id,
+        eventId: todo.eventId,
+        todoId: todo.id,
+        title: todo.text,
+        summary: `${todo.eventDate} · ${todo.eventTitle}`,
+        href: todoTabActivityHref(roomId, todo.eventId, todo.id, todo.eventDate),
+      });
+    }
+  }
+
   return (
     <section className="rounded-md border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-soft)]">
       <div className="flex items-start justify-between gap-3">
@@ -423,12 +453,7 @@ function SelectedDateEventList({
                         <input
                           type="checkbox"
                           checked={todo.done}
-                          onChange={(change) =>
-                            updateDoc(doc(getDb(), "rooms", roomId, "events", todo.eventId, "todos", todo.id), {
-                              done: change.target.checked,
-                              updatedAt: serverTimestamp(),
-                            })
-                          }
+                          onChange={(change) => toggleTodoDone(todo, change.target.checked)}
                           className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--accent)]"
                           aria-label={`${todo.text} 완료 상태 변경`}
                         />
@@ -458,7 +483,7 @@ function SelectedDateEventList({
                     연결된 할일이 없습니다.
                   </p>
                 )}
-                <InlineTodoAdd roomId={roomId} eventId={event.id} />
+                <InlineTodoAdd roomId={roomId} eventId={event.id} date={date} />
               </div>
             </article>
           );
@@ -468,7 +493,7 @@ function SelectedDateEventList({
   );
 }
 
-function InlineTodoAdd({ roomId, eventId }: { roomId: string; eventId: string }) {
+function InlineTodoAdd({ roomId, eventId, date }: { roomId: string; eventId: string; date: string }) {
   const session = useAnonymousSession();
   const [text, setText] = useState("");
   const [saving, setSaving] = useState(false);
@@ -489,7 +514,7 @@ function InlineTodoAdd({ roomId, eventId }: { roomId: string; eventId: string })
     setMessage(null);
 
     try {
-      await addDoc(collection(getDb(), "rooms", roomId, "events", eventId, "todos"), {
+      const todoRef = await addDoc(collection(getDb(), "rooms", roomId, "events", eventId, "todos"), {
         text: trimmed,
         done: false,
         order: Date.now(),
@@ -497,6 +522,17 @@ function InlineTodoAdd({ roomId, eventId }: { roomId: string; eventId: string })
         authorLabel: author.label,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+      });
+      await recordRoomActivity(roomId, {
+        type: "todo.created",
+        actor: author,
+        targetType: "todo",
+        targetId: todoRef.id,
+        eventId,
+        todoId: todoRef.id,
+        title: trimmed,
+        summary: "선택일 일정에서 할일 추가",
+        href: todoActivityHref(roomId, eventId, todoRef.id, date),
       });
       setText("");
       setMessage("할일을 추가했습니다.");

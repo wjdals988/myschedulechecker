@@ -12,6 +12,7 @@ import { TodoComments } from "@/components/TodoComments";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
 import { useTodosForEvents } from "@/hooks/useTodosForEvents";
+import { recordRoomActivity, todoActivityHref, todoTabActivityHref } from "@/lib/activity";
 import { dateKey, parseDateKey, todayKey } from "@/lib/dates";
 import { deleteTodoWithComments } from "@/lib/eventMutations";
 import { getEventColorOption, normalizeEventTag } from "@/lib/eventAppearance";
@@ -94,7 +95,7 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
     setMessage(null);
 
     try {
-      await addDoc(collection(getDb(), "rooms", roomId, "events", effectiveTargetEventId, "todos"), {
+      const todoRef = await addDoc(collection(getDb(), "rooms", roomId, "events", effectiveTargetEventId, "todos"), {
         text: trimmed,
         done: false,
         order: Date.now(),
@@ -102,6 +103,20 @@ export function TodoTab({ roomId, date, range }: { roomId: string; date: string;
         authorLabel: author.label,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+      });
+      const targetEvent = events.find((event) => event.id === effectiveTargetEventId);
+      await recordRoomActivity(roomId, {
+        type: "todo.created",
+        actor: author,
+        targetType: "todo",
+        targetId: todoRef.id,
+        eventId: effectiveTargetEventId,
+        todoId: todoRef.id,
+        title: trimmed,
+        summary: targetEvent ? `${targetEvent.date} · ${targetEvent.title}` : "할일 추가",
+        href: targetEvent
+          ? todoTabActivityHref(roomId, effectiveTargetEventId, todoRef.id, targetEvent.date)
+          : todoActivityHref(roomId, effectiveTargetEventId, todoRef.id),
       });
       setText("");
       setMessage("할일을 추가했습니다.");
@@ -311,7 +326,7 @@ function DateTodoQuickAdd({
     setMessage(null);
 
     try {
-      await addDoc(collection(getDb(), "rooms", roomId, "events", effectiveTargetEventId, "todos"), {
+      const todoRef = await addDoc(collection(getDb(), "rooms", roomId, "events", effectiveTargetEventId, "todos"), {
         text: trimmed,
         done: false,
         order: Date.now(),
@@ -319,6 +334,19 @@ function DateTodoQuickAdd({
         authorLabel: author.label,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+      });
+      await recordRoomActivity(roomId, {
+        type: "todo.created",
+        actor: author,
+        targetType: "todo",
+        targetId: todoRef.id,
+        eventId: effectiveTargetEventId,
+        todoId: todoRef.id,
+        title: trimmed,
+        summary: selectedEvent ? `${selectedEvent.date} · ${selectedEvent.title}` : "날짜별 할일 추가",
+        href: selectedEvent
+          ? todoTabActivityHref(roomId, effectiveTargetEventId, todoRef.id, selectedEvent.date)
+          : todoActivityHref(roomId, effectiveTargetEventId, todoRef.id),
       });
       setText("");
       setMessage("추가했습니다.");
@@ -466,7 +494,57 @@ function TodoListItem({
       text: trimmed,
       updatedAt: serverTimestamp(),
     });
+    if (author) {
+      await recordRoomActivity(roomId, {
+        type: "todo.updated",
+        actor: author,
+        targetType: "todo",
+        targetId: todo.id,
+        eventId: todo.eventId,
+        todoId: todo.id,
+        title: trimmed,
+        summary: `${todo.eventDate} · ${todo.eventTitle}`,
+        href: todoTabActivityHref(roomId, todo.eventId, todo.id, todo.eventDate),
+      });
+    }
     setEditing(false);
+  }
+
+  async function toggleDone(nextDone: boolean) {
+    await updateDoc(ref, {
+      done: nextDone,
+      updatedAt: serverTimestamp(),
+    });
+    if (author) {
+      await recordRoomActivity(roomId, {
+        type: nextDone ? "todo.completed" : "todo.reopened",
+        actor: author,
+        targetType: "todo",
+        targetId: todo.id,
+        eventId: todo.eventId,
+        todoId: todo.id,
+        title: todo.text,
+        summary: `${todo.eventDate} · ${todo.eventTitle}`,
+        href: todoTabActivityHref(roomId, todo.eventId, todo.id, todo.eventDate),
+      });
+    }
+  }
+
+  async function removeTodo() {
+    await deleteTodoWithComments(roomId, todo.eventId, todo.id);
+    if (author) {
+      await recordRoomActivity(roomId, {
+        type: "todo.deleted",
+        actor: author,
+        targetType: "todo",
+        targetId: todo.id,
+        eventId: todo.eventId,
+        todoId: todo.id,
+        title: todo.text,
+        summary: `${todo.eventDate} · ${todo.eventTitle}`,
+        href: `/rooms/${roomId}/schedule/${todo.eventId}?date=${todo.eventDate}`,
+      });
+    }
   }
 
   return (
@@ -475,12 +553,7 @@ function TodoListItem({
         <input
           type="checkbox"
           checked={todo.done}
-          onChange={(event) =>
-            updateDoc(ref, {
-              done: event.target.checked,
-              updatedAt: serverTimestamp(),
-            })
-          }
+          onChange={(event) => toggleDone(event.target.checked)}
           className="mt-1 h-5 w-5 accent-[var(--accent)]"
           aria-label="할일 완료 여부"
         />
@@ -559,7 +632,7 @@ function TodoListItem({
           </Link>
           <button
             type="button"
-            onClick={() => deleteTodoWithComments(roomId, todo.eventId, todo.id)}
+            onClick={removeTodo}
             className="grid h-9 w-9 place-items-center rounded-md border border-red-200 text-red-600"
             title="할일 삭제"
           >
@@ -570,7 +643,7 @@ function TodoListItem({
 
       {author ? (
         <div className="mt-3 sm:ml-8">
-          <TodoComments roomId={roomId} eventId={todo.eventId} todoId={todo.id} author={author} />
+          <TodoComments roomId={roomId} eventId={todo.eventId} eventDate={todo.eventDate} todoId={todo.id} author={author} />
         </div>
       ) : null}
     </article>

@@ -11,6 +11,7 @@ import { ShareTargetButton } from "@/components/ShareTargetButton";
 import { TodoEditor } from "@/components/TodoEditor";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { useEvent } from "@/hooks/useEvent";
+import { eventActivityHref, recordRoomActivity } from "@/lib/activity";
 import { deleteEventWithTodos } from "@/lib/eventMutations";
 import { getEventColorOption, normalizeEventColor, normalizeEventTag, type EventColorKey } from "@/lib/eventAppearance";
 import { getDb } from "@/lib/firebase";
@@ -133,6 +134,18 @@ function EventEditor({
         color: normalizeEventColor(draft.color),
         updatedAt: serverTimestamp(),
       });
+      if (author) {
+        await recordRoomActivity(roomId, {
+          type: "event.updated",
+          actor: author,
+          targetType: "event",
+          targetId: eventId,
+          eventId,
+          title,
+          summary: `${draft.date} · ${draft.startTime || "종일"}`,
+          href: eventActivityHref(roomId, eventId, draft.date),
+        });
+      }
 
       setMessage("일정을 저장했습니다.");
       if (draft.date !== event.date) {
@@ -151,6 +164,18 @@ function EventEditor({
 
     try {
       await deleteEventWithTodos(roomId, eventId);
+      if (author) {
+        await recordRoomActivity(roomId, {
+          type: "event.deleted",
+          actor: author,
+          targetType: "event",
+          targetId: eventId,
+          eventId,
+          title: event.title,
+          summary: `${event.date} 일정 삭제`,
+          href: `/rooms/${roomId}/schedule?date=${event.date}`,
+        });
+      }
       router.replace(`/rooms/${roomId}/schedule?date=${event.date}`);
     } catch (caught) {
       setMessage(caught instanceof Error ? caught.message : "일정 삭제에 실패했습니다.");
@@ -341,7 +366,7 @@ function EventEditor({
           <h2 className="text-xl font-bold text-[var(--foreground)]">해야 할 일</h2>
         </div>
         {author ? (
-          <TodoEditor roomId={roomId} eventId={eventId} author={author} highlightTodoId={highlightTodoId} />
+          <TodoEditor roomId={roomId} eventId={eventId} eventDate={event.date} author={author} highlightTodoId={highlightTodoId} />
         ) : (
           <p className="text-sm text-[var(--muted)]">작성자 정보를 준비하는 중입니다.</p>
         )}

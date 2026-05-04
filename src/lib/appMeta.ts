@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.22",
+    releasedAt: "2026-05-04",
+    title: "방별 최근 활동 추가",
+    changes: [
+      "각 공유방 헤더에 최근 활동 버튼을 추가해 PC에서는 우측 패널, 모바일에서는 하단 시트로 변경 내역을 볼 수 있게 했습니다.",
+      "일정, 할일, 의견의 추가, 수정, 완료, 삭제 동작을 방별 활동 로그로 기록하도록 연결했습니다.",
+      "최근 활동 항목을 누르면 가능한 경우 관련 일정 또는 할일 화면으로 바로 이동하도록 개선했습니다.",
+    ],
+  },
+  {
     version: "0.5.21",
     releasedAt: "2026-04-27",
     title: "공유 동작 피드백 개선",

@@ -13,6 +13,7 @@ import {
 import { KeyboardEvent, useEffect, useState } from "react";
 import { TrashIcon } from "@/components/icons";
 import { LinkifiedText } from "@/components/LinkifiedText";
+import { eventActivityHref, recordRoomActivity } from "@/lib/activity";
 import { getDb } from "@/lib/firebase";
 import type { CommentItem } from "@/lib/types";
 
@@ -56,12 +57,22 @@ export function EventComments({
     setError(null);
 
     try {
-      await addDoc(collection(getDb(), "rooms", roomId, "events", eventId, "comments"), {
+      const commentRef = await addDoc(collection(getDb(), "rooms", roomId, "events", eventId, "comments"), {
         text: nextText,
         authorUid: author.uid,
         authorLabel: author.label,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+      });
+      await recordRoomActivity(roomId, {
+        type: "event.comment.created",
+        actor: author,
+        targetType: "comment",
+        targetId: commentRef.id,
+        eventId,
+        title: "일정 의견",
+        summary: nextText,
+        href: eventActivityHref(roomId, eventId),
       });
       setText("");
     } catch (caught) {
@@ -69,6 +80,20 @@ export function EventComments({
     } finally {
       setBusy(false);
     }
+  }
+
+  async function removeComment(comment: CommentItem) {
+    await deleteDoc(doc(getDb(), "rooms", roomId, "events", eventId, "comments", comment.id));
+    await recordRoomActivity(roomId, {
+      type: "event.comment.deleted",
+      actor: author,
+      targetType: "comment",
+      targetId: comment.id,
+      eventId,
+      title: "일정 의견 삭제",
+      summary: comment.text,
+      href: eventActivityHref(roomId, eventId),
+    });
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -119,7 +144,7 @@ export function EventComments({
               {comment.authorUid === author.uid ? (
                 <button
                   type="button"
-                  onClick={() => deleteDoc(doc(getDb(), "rooms", roomId, "events", eventId, "comments", comment.id))}
+                  onClick={() => removeComment(comment)}
                   className="grid h-8 w-8 shrink-0 place-items-center rounded border border-red-200 text-red-600"
                   title="의견 삭제"
                 >

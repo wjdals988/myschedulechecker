@@ -15,6 +15,7 @@ import { EditIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import { LinkifiedText } from "@/components/LinkifiedText";
 import { ShareTargetButton } from "@/components/ShareTargetButton";
 import { TodoComments } from "@/components/TodoComments";
+import { recordRoomActivity, todoActivityHref } from "@/lib/activity";
 import { deleteTodoWithComments } from "@/lib/eventMutations";
 import { getDb } from "@/lib/firebase";
 import type { TodoItem } from "@/lib/types";
@@ -23,11 +24,13 @@ import { cn } from "@/lib/utils";
 export function TodoEditor({
   roomId,
   eventId,
+  eventDate,
   author,
   highlightTodoId,
 }: {
   roomId: string;
   eventId: string;
+  eventDate: string;
   author: { uid: string; label: string };
   highlightTodoId?: string | null;
 }) {
@@ -57,7 +60,7 @@ export function TodoEditor({
     const trimmed = text.trim();
     if (!trimmed) return;
 
-    await addDoc(collection(getDb(), "rooms", roomId, "events", eventId, "todos"), {
+    const todoRef = await addDoc(collection(getDb(), "rooms", roomId, "events", eventId, "todos"), {
       text: trimmed,
       done: false,
       order: Date.now(),
@@ -65,6 +68,17 @@ export function TodoEditor({
       authorLabel: author.label,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
+    });
+    await recordRoomActivity(roomId, {
+      type: "todo.created",
+      actor: author,
+      targetType: "todo",
+      targetId: todoRef.id,
+      eventId,
+      todoId: todoRef.id,
+      title: trimmed,
+      summary: "할일 추가",
+      href: todoActivityHref(roomId, eventId, todoRef.id, eventDate),
     });
     setText("");
   }
@@ -107,6 +121,7 @@ export function TodoEditor({
             key={todo.id}
             roomId={roomId}
             eventId={eventId}
+            eventDate={eventDate}
             todo={todo}
             author={author}
             highlighted={todo.id === highlightTodoId}
@@ -120,12 +135,14 @@ export function TodoEditor({
 function TodoRow({
   roomId,
   eventId,
+  eventDate,
   todo,
   author,
   highlighted,
 }: {
   roomId: string;
   eventId: string;
+  eventDate: string;
   todo: TodoItem;
   author: { uid: string; label: string };
   highlighted: boolean;
@@ -156,7 +173,51 @@ function TodoRow({
       text: trimmed,
       updatedAt: serverTimestamp(),
     });
+    await recordRoomActivity(roomId, {
+      type: "todo.updated",
+      actor: author,
+      targetType: "todo",
+      targetId: todo.id,
+      eventId,
+      todoId: todo.id,
+      title: trimmed,
+      summary: "할일 제목 수정",
+      href: todoActivityHref(roomId, eventId, todo.id, eventDate),
+    });
     setEditing(false);
+  }
+
+  async function toggleDone(nextDone: boolean) {
+    await updateDoc(ref, {
+      done: nextDone,
+      updatedAt: serverTimestamp(),
+    });
+    await recordRoomActivity(roomId, {
+      type: nextDone ? "todo.completed" : "todo.reopened",
+      actor: author,
+      targetType: "todo",
+      targetId: todo.id,
+      eventId,
+      todoId: todo.id,
+      title: todo.text,
+      summary: nextDone ? "완료로 변경" : "미완료로 변경",
+      href: todoActivityHref(roomId, eventId, todo.id, eventDate),
+    });
+  }
+
+  async function removeTodo() {
+    await deleteTodoWithComments(roomId, eventId, todo.id);
+    await recordRoomActivity(roomId, {
+      type: "todo.deleted",
+      actor: author,
+      targetType: "todo",
+      targetId: todo.id,
+      eventId,
+      todoId: todo.id,
+      title: todo.text,
+      summary: "할일 삭제",
+      href: `/rooms/${roomId}/schedule/${eventId}?date=${eventDate}`,
+    });
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -182,12 +243,7 @@ function TodoRow({
         <input
           type="checkbox"
           checked={todo.done}
-          onChange={(event) =>
-            updateDoc(ref, {
-              done: event.target.checked,
-              updatedAt: serverTimestamp(),
-            })
-          }
+          onChange={(event) => toggleDone(event.target.checked)}
           className="mt-2 h-5 w-5 accent-[var(--accent)]"
           aria-label="할일 완료 여부"
         />
@@ -245,7 +301,7 @@ function TodoRow({
           </button>
           <button
             type="button"
-            onClick={() => deleteTodoWithComments(roomId, eventId, todo.id)}
+            onClick={removeTodo}
             className="grid h-9 w-9 place-items-center rounded border border-red-200 text-red-600"
             title="할일 삭제"
           >
@@ -253,7 +309,7 @@ function TodoRow({
           </button>
         </div>
       </div>
-      <TodoComments roomId={roomId} eventId={eventId} todoId={todo.id} author={author} />
+      <TodoComments roomId={roomId} eventId={eventId} eventDate={eventDate} todoId={todo.id} author={author} />
     </div>
   );
 }

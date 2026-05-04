@@ -13,17 +13,20 @@ import {
 import { KeyboardEvent, useEffect, useState } from "react";
 import { TrashIcon } from "@/components/icons";
 import { LinkifiedText } from "@/components/LinkifiedText";
+import { recordRoomActivity, todoActivityHref } from "@/lib/activity";
 import { getDb } from "@/lib/firebase";
 import type { CommentItem } from "@/lib/types";
 
 export function TodoComments({
   roomId,
   eventId,
+  eventDate,
   todoId,
   author,
 }: {
   roomId: string;
   eventId: string;
+  eventDate?: string;
   todoId: string;
   author: { uid: string; label: string };
 }) {
@@ -58,12 +61,23 @@ export function TodoComments({
     setError(null);
 
     try {
-      await addDoc(collection(getDb(), "rooms", roomId, "events", eventId, "todos", todoId, "comments"), {
+      const commentRef = await addDoc(collection(getDb(), "rooms", roomId, "events", eventId, "todos", todoId, "comments"), {
         text: nextText,
         authorUid: author.uid,
         authorLabel: author.label,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+      });
+      await recordRoomActivity(roomId, {
+        type: "todo.comment.created",
+        actor: author,
+        targetType: "comment",
+        targetId: commentRef.id,
+        eventId,
+        todoId,
+        title: "할일 의견",
+        summary: nextText,
+        href: todoActivityHref(roomId, eventId, todoId, eventDate),
       });
       setText("");
     } catch (caught) {
@@ -71,6 +85,21 @@ export function TodoComments({
     } finally {
       setBusy(false);
     }
+  }
+
+  async function removeComment(comment: CommentItem) {
+    await deleteDoc(doc(getDb(), "rooms", roomId, "events", eventId, "todos", todoId, "comments", comment.id));
+    await recordRoomActivity(roomId, {
+      type: "todo.comment.deleted",
+      actor: author,
+      targetType: "comment",
+      targetId: comment.id,
+      eventId,
+      todoId,
+      title: "할일 의견 삭제",
+      summary: comment.text,
+      href: todoActivityHref(roomId, eventId, todoId, eventDate),
+    });
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -99,7 +128,7 @@ export function TodoComments({
                 {comment.authorUid === author.uid ? (
                   <button
                     type="button"
-                    onClick={() => deleteDoc(doc(getDb(), "rooms", roomId, "events", eventId, "todos", todoId, "comments", comment.id))}
+                    onClick={() => removeComment(comment)}
                     className="grid h-7 w-7 shrink-0 place-items-center rounded border border-red-200 text-red-600"
                     title="의견 삭제"
                   >

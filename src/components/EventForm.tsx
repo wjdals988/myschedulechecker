@@ -5,6 +5,7 @@ import { FormEvent, useState } from "react";
 import { EventAppearanceFields } from "@/components/EventAppearanceFields";
 import { PlusIcon } from "@/components/icons";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
+import { eventActivityHref, recordRoomActivity } from "@/lib/activity";
 import { DEFAULT_EVENT_COLOR, normalizeEventColor, normalizeEventTag, type EventColorKey } from "@/lib/eventAppearance";
 import { getDb } from "@/lib/firebase";
 import { profileDisplayName } from "@/lib/profile";
@@ -41,8 +42,10 @@ export function EventForm({
     setError(null);
 
     try {
-      await addDoc(collection(getDb(), "rooms", roomId, "events"), {
-        title: title.trim(),
+      const normalizedTitle = title.trim();
+      const authorLabel = profileDisplayName(session.profile);
+      const eventRef = await addDoc(collection(getDb(), "rooms", roomId, "events"), {
+        title: normalizedTitle,
         date,
         startTime: startTime || null,
         endTime: endTime || null,
@@ -51,9 +54,19 @@ export function EventForm({
         tag: normalizeEventTag(tag) || null,
         color: normalizeEventColor(color),
         authorUid: session.uid,
-        authorLabel: profileDisplayName(session.profile),
+        authorLabel,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+      });
+      await recordRoomActivity(roomId, {
+        type: "event.created",
+        actor: { uid: session.uid, label: authorLabel },
+        targetType: "event",
+        targetId: eventRef.id,
+        eventId: eventRef.id,
+        title: normalizedTitle,
+        summary: `${date} · ${startTime || "종일"}`,
+        href: eventActivityHref(roomId, eventRef.id, date),
       });
 
       setTitle("");

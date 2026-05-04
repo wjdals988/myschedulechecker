@@ -67,3 +67,32 @@ export type CommentItem = {
   createdAt?: unknown;
   updatedAt?: unknown;
 };
+
+export type ActivityType =
+  | "event.created"
+  | "event.updated"
+  | "event.deleted"
+  | "event.comment.created"
+  | "event.comment.deleted"
+  | "todo.created"
+  | "todo.updated"
+  | "todo.completed"
+  | "todo.reopened"
+  | "todo.deleted"
+  | "todo.comment.created"
+  | "todo.comment.deleted";
+
+export type RoomActivity = {
+  id: string;
+  type: ActivityType;
+  actorUid: string;
+  actorLabel: string;
+  targetType: "event" | "todo" | "comment";
+  targetId: string;
+  eventId?: string | null;
+  todoId?: string | null;
+  title: string;
+  summary?: string | null;
+  href?: string | null;
+  createdAt?: unknown;
+};

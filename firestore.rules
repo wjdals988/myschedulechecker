@@ -63,6 +63,17 @@ service cloud.firestore {
         allow delete: if signedIn() && uid == request.auth.uid;
       }
 
+      match /activities/{activityId} {
+        allow read: if isMember(roomId);
+        allow create: if isMember(roomId)
+          && request.resource.data.actorUid == request.auth.uid
+          && request.resource.data.actorLabel is string
+          && request.resource.data.type is string
+          && request.resource.data.title is string
+          && request.resource.data.createdAt is timestamp;
+        allow update, delete: if false;
+      }
+
       match /events/{eventId} {
         allow read, create, update, delete: if isMember(roomId);
 

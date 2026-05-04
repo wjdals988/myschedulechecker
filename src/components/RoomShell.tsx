@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PersonalMenu } from "@/components/PersonalMenu";
 import { ProfilePicker } from "@/components/ProfilePicker";
+import { RecentActivityButton } from "@/components/RecentActivityButton";
 import { ReleaseNotesButton } from "@/components/ReleaseNotesButton";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { todayKey } from "@/lib/dates";
@@ -159,6 +160,8 @@ export function RoomShell({
           </div>
 
           <div className="flex shrink-0 items-center gap-2 self-start sm:self-auto">
+            <RecentActivityButton roomId={roomId} />
+
             <button
               onClick={() => copyShareLink(room.inviteCode)}
               className="app-button-secondary inline-flex h-10 items-center justify-center gap-1 px-3 text-sm font-semibold shadow-[var(--shadow-soft)] hover:border-[var(--accent)]"

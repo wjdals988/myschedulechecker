@@ -7,15 +7,20 @@ import { AgendaListPanel } from "@/components/AgendaListPanel";
 import { EventForm } from "@/components/EventForm";
 import { PlusIcon, TrashIcon } from "@/components/icons";
 import { LinkifiedText } from "@/components/LinkifiedText";
+import { useAnonymousSession } from "@/hooks/useAnonymousSession";
+import { recordRoomActivity } from "@/lib/activity";
 import { useEventsInRange } from "@/hooks/useEventsInRange";
 import { dateKey, dayLabel, getMonthGrid, isCurrentMonth, isToday, monthTitle, parseDateKey } from "@/lib/dates";
 import { getEventColorOption, normalizeEventTag } from "@/lib/eventAppearance";
 import { deleteEventWithTodos } from "@/lib/eventMutations";
 import { getKoreanHoliday, getKoreanHolidayMapForDates } from "@/lib/koreanHolidays";
+import { profileDisplayName } from "@/lib/profile";
+import type { EventItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export function MonthlyCalendar({ roomId, initialDate }: { roomId: string; initialDate?: string }) {
   const router = useRouter();
+  const session = useAnonymousSession();
   const [month, setMonth] = useState(() => (initialDate ? parseDateKey(initialDate) : new Date()));
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
@@ -49,17 +54,29 @@ export function MonthlyCalendar({ roomId, initialDate }: { roomId: string; initi
     setDeletingEventId(null);
   }
 
-  async function handleDeleteEvent(eventId: string, title: string) {
-    if (!window.confirm(`"${title}" 일정을 삭제할까요? 연결된 To-do도 함께 삭제됩니다.`)) {
+  async function handleDeleteEvent(event: EventItem) {
+    if (!window.confirm(`"${event.title}" 일정을 삭제할까요? 연결된 To-do도 함께 삭제됩니다.`)) {
       return;
     }
 
-    setDeletingEventId(eventId);
+    setDeletingEventId(event.id);
     setEventActionMessage(null);
 
     try {
-      await deleteEventWithTodos(roomId, eventId);
-      setEventActionMessage(`"${title}" 일정을 삭제했습니다.`);
+      await deleteEventWithTodos(roomId, event.id);
+      if (session.uid && session.profile) {
+        await recordRoomActivity(roomId, {
+          type: "event.deleted",
+          actor: { uid: session.uid, label: profileDisplayName(session.profile) },
+          targetType: "event",
+          targetId: event.id,
+          eventId: event.id,
+          title: event.title,
+          summary: `${event.date} 일정 삭제`,
+          href: `/rooms/${roomId}/schedule?date=${event.date}`,
+        });
+      }
+      setEventActionMessage(`"${event.title}" 일정을 삭제했습니다.`);
     } catch (caught) {
       setEventActionMessage(caught instanceof Error ? caught.message : "일정 삭제에 실패했습니다.");
     } finally {
@@ -289,7 +306,7 @@ export function MonthlyCalendar({ roomId, initialDate }: { roomId: string; initi
 
                         <button
                           type="button"
-                          onClick={() => handleDeleteEvent(event.id, event.title)}
+                          onClick={() => handleDeleteEvent(event)}
                           disabled={deletingEventId === event.id}
                           className="inline-flex h-10 shrink-0 items-center justify-center gap-1 rounded-md border border-red-200 bg-white px-3 text-xs font-semibold text-red-700 disabled:opacity-50"
                         >
