@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PersonalMenu } from "@/components/PersonalMenu";
 import { ProfilePicker } from "@/components/ProfilePicker";
+import { PwaInstallButton } from "@/components/PwaInstallButton";
 import { RecentActivityButton } from "@/components/RecentActivityButton";
 import { ReleaseNotesButton } from "@/components/ReleaseNotesButton";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
@@ -160,6 +161,7 @@ export function RoomShell({
           </div>
 
           <div className="flex shrink-0 items-center gap-2 self-start sm:self-auto">
+            <PwaInstallButton />
             <RecentActivityButton roomId={roomId} />
 
             <button

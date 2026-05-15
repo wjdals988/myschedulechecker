@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.23",
+    releasedAt: "2026-05-16",
+    title: "모바일 앱 설치 버튼 추가",
+    changes: [
+      "방 화면 헤더에 홈 화면 설치 버튼을 추가해 지원 브라우저에서는 설치 프롬프트를 직접 띄우도록 했습니다.",
+      "iPhone Safari처럼 버튼으로 직접 설치할 수 없는 환경에서는 홈 화면 추가 안내 시트를 표시하도록 개선했습니다.",
+      "PWA 설치 조건을 맞추기 위해 service worker와 PNG 앱 아이콘, Apple touch icon 메타데이터를 추가했습니다.",
+    ],
+  },
+  {
     version: "0.5.22",
     releasedAt: "2026-05-04",
     title: "방별 최근 활동 추가",

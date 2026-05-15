@@ -45,6 +45,19 @@ export const metadata: Metadata = {
     description,
     images: [ogImage],
   },
+  icons: {
+    icon: [
+      { url: "/calendar-shortcut-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/calendar-shortcut-512.png", sizes: "512x512", type: "image/png" },
+      { url: "/calendar-shortcut.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/calendar-shortcut-192.png", sizes: "192x192", type: "image/png" }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: appTitle,
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({
