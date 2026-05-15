@@ -11,6 +11,16 @@ export type AppReleaseNote = {
 
 export const APP_RELEASE_NOTES: AppReleaseNote[] = [
   {
+    version: "0.5.24",
+    releasedAt: "2026-05-16",
+    title: "Android 설치 안내 보강",
+    changes: [
+      "Android에서 PWA 설치 조건을 더 안정적으로 만족하도록 service worker의 fetch 처리를 보강했습니다.",
+      "설치 버튼 선택 시 Chrome 메뉴의 앱 설치 또는 홈 화면에 추가 경로를 더 구체적으로 안내하도록 개선했습니다.",
+      "service worker 준비 상태를 설치 버튼에 반영해 설치 준비 중인 상황을 구분할 수 있게 했습니다.",
+    ],
+  },
+  {
     version: "0.5.23",
     releasedAt: "2026-05-16",
     title: "모바일 앱 설치 버튼 추가",

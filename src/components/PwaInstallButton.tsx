@@ -16,11 +16,14 @@ export function PwaInstallButton({ className }: { className?: string }) {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
   const [status, setStatus] = useState<InstallStatus>("idle");
+  const [serviceWorkerReady, setServiceWorkerReady] = useState(false);
 
   useEffect(() => {
     if (isStandalone()) return;
 
-    registerServiceWorker();
+    registerServiceWorker().then((ready) => {
+      setServiceWorkerReady(ready);
+    });
 
     function handleBeforeInstallPrompt(event: Event) {
       event.preventDefault();
@@ -61,11 +64,11 @@ export function PwaInstallButton({ className }: { className?: string }) {
       return;
     }
 
-    setStatus("unsupported");
+    setStatus(serviceWorkerReady ? "unsupported" : "idle");
     setGuideOpen(true);
   }
 
-  const label = status === "installed" ? "설치됨" : status === "ready" ? "앱 설치" : "설치";
+  const label = status === "installed" ? "설치됨" : status === "ready" ? "앱 설치" : serviceWorkerReady ? "설치" : "준비";
 
   return (
     <>
@@ -101,7 +104,7 @@ export function PwaInstallButton({ className }: { className?: string }) {
                 <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[var(--border-strong)] sm:hidden" />
                 <p className="app-kicker text-[0.7rem] font-bold">Install</p>
                 <h2 className="mt-1 text-xl font-bold text-[var(--foreground)]">{getGuideTitle(status)}</h2>
-                <InstallGuide />
+                <InstallGuide status={status} serviceWorkerReady={serviceWorkerReady} />
                 <button
                   type="button"
                   onClick={() => setGuideOpen(false)}
@@ -118,7 +121,13 @@ export function PwaInstallButton({ className }: { className?: string }) {
   );
 }
 
-function InstallGuide() {
+function InstallGuide({
+  status,
+  serviceWorkerReady,
+}: {
+  status: InstallStatus;
+  serviceWorkerReady: boolean;
+}) {
   const environment = getInstallEnvironment();
 
   if (environment === "ios-safari") {
@@ -140,10 +149,31 @@ function InstallGuide() {
     );
   }
 
+  if (environment === "android") {
+    return (
+      <div className="mt-4 space-y-3 text-sm font-semibold leading-6 text-[var(--muted)]">
+        {status === "ready" ? (
+          <p>설치 준비가 완료되었습니다. 다시 설치 버튼을 누르면 브라우저 설치 팝업이 열립니다.</p>
+        ) : null}
+        {!serviceWorkerReady ? (
+          <p>설치 준비를 마치는 중입니다. 이 안내를 닫고 2-3초 뒤 다시 설치 버튼을 눌러보세요.</p>
+        ) : null}
+        <ol className="space-y-2">
+          <li>1. Android Chrome 기준으로 우측 상단 ⋮ 메뉴를 누릅니다.</li>
+          <li>2. 앱 설치 또는 홈 화면에 추가를 선택합니다.</li>
+          <li>3. 버튼 설치 팝업이 안 뜨면 페이지를 새로고침한 뒤 다시 설치를 눌러주세요.</li>
+        </ol>
+        <p className="text-xs leading-5 text-[var(--muted-soft)]">
+          카카오톡, 네이버앱, 일부 인앱 브라우저에서는 설치 팝업이 막힐 수 있습니다. 이 경우 Chrome으로 열어야 합니다.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-4 space-y-3 text-sm font-semibold leading-6 text-[var(--muted)]">
       <p>설치 팝업이 바로 뜨지 않으면 브라우저 메뉴에서 앱 설치 또는 홈 화면에 추가를 선택해 주세요.</p>
-      <p>Android Chrome, Edge, Samsung Internet 계열에서는 설치 조건이 충족되면 이 버튼으로 설치 팝업이 열립니다.</p>
+      <p>Chrome, Edge, Samsung Internet 계열에서는 설치 조건이 충족되면 이 버튼으로 설치 팝업이 열립니다.</p>
     </div>
   );
 }
@@ -157,10 +187,12 @@ function getGuideTitle(status: InstallStatus) {
 function getInstallEnvironment() {
   const userAgent = window.navigator.userAgent;
   const isIos = /iphone|ipad|ipod/i.test(userAgent);
+  const isAndroid = /android/i.test(userAgent);
   const isIosSafari = isIos && /safari/i.test(userAgent) && !/(crios|fxios|edgios|opios)/i.test(userAgent);
 
   if (isIosSafari) return "ios-safari";
   if (isIos) return "ios-other";
+  if (isAndroid) return "android";
   return "other";
 }
 
@@ -170,9 +202,16 @@ function isStandalone() {
   return window.matchMedia("(display-mode: standalone)").matches || navigatorWithStandalone.standalone === true;
 }
 
-function registerServiceWorker() {
-  if (!("serviceWorker" in navigator)) return;
-  if (window.location.protocol !== "https:" && window.location.hostname !== "localhost") return;
+async function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return false;
+  if (window.location.protocol !== "https:" && window.location.hostname !== "localhost") return false;
 
-  navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+  try {
+    const registration = await navigator.serviceWorker.register("/sw.js");
+    await navigator.serviceWorker.ready;
+    registration.update().catch(() => undefined);
+    return true;
+  } catch {
+    return false;
+  }
 }
